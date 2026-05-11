@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:\\\\Unity\\\\2DShootingAI\" add \"Assets/Scripts/Enemy/EnemyBase.cs\")",
+      "Bash(git -C 'C:\\\\Unity\\\\2DShootingAI' commit -m ' *)",
+      "Bash(Test-Path C:\\\\Unity\\\\2DShootingAI\\\\Assets\\\\Scripts\\\\Enemy\\\\Patterns *)"
+    ]
+  }
+}

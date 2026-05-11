@@ -1,6 +1,7 @@
 // Attach to: Bullet Prefab
 
 using UnityEngine;
+using ShooterGame.Enemy;
 
 namespace ShooterGame.Player
 {
@@ -41,9 +42,12 @@ namespace ShooterGame.Player
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            // Damage is handled by EnemyBase (Day 2) — just return to pool on hit
             if (other.CompareTag(Utils.Constants.TAG_ENEMY))
+            {
+                EnemyBase enemy = other.GetComponent<EnemyBase>();
+                enemy?.TakeDamage(damage);
                 ReturnToPool();
+            }
         }
 
         public int GetDamage() => damage;

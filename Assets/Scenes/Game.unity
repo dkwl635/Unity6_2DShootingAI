@@ -541,7 +541,7 @@ GameObject:
   - component: {fileID: 345355879}
   - component: {fileID: 345355878}
   m_Layer: 0
-  m_Name: BackgroundScroller (1)
+  m_Name: BackgroundScroller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
