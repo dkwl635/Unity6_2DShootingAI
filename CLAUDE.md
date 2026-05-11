@@ -189,10 +189,31 @@ Extend without breaking existing structure.
 - `new WaitForSeconds()` inside coroutines ❌ → Cache as a field
 - `SetActive(false/true)` for high-frequency objects ❌ → Use Object Pool instead
 - Hardcoded tag/layer strings (e.g. `"Player"`, `"Enemy"`) ❌ → Use `Constants.cs`
+- Putting in-game session logic into `GameManager` ❌ → Use `InGameManager` for session-scoped state
 
 ---
 
-## 9. Mobile Performance Rules
+## 9. Design Improvement Suggestions (Claude 자동 언급 규칙)
+
+작업 완료 후, 아래 상황에 해당하면 Claude가 먼저 개선 방향을 언급한다.
+유저가 먼저 묻기 전에 선제적으로 제안하는 것이 원칙이다.
+
+### 언급해야 할 상황
+| 상황 | 예시 |
+|------|------|
+| 한 클래스가 2가지 이상의 책임을 갖고 있을 때 | GameManager가 점수/저장까지 처리 |
+| `DontDestroyOnLoad` 여부가 설계 의도와 맞지 않을 때 | 씬 전용 Manager에 DDOL이 붙어 있을 때 |
+| Manager 간 직접 참조가 이벤트로 교체 가능할 때 | A.Instance.Method()를 Action으로 대체 가능 |
+| 금지 패턴(섹션 8)이 코드에서 발견될 때 | Update 내 Camera.main, 루프 내 Instantiate 등 |
+| ScriptableObject로 분리할 수 있는 하드코딩 데이터가 있을 때 | 스탯·수치가 코드에 직접 박혀 있을 때 |
+| Object Pool 없이 Instantiate/Destroy가 반복될 때 | 총알·이펙트를 매번 생성·파괴하는 구조 |
+
+### 언급 방식
+- 작업 완료 요약 직후, 별도 단락으로 짧게 언급
+- "개선 포인트가 있습니다 — 반영할까요?" 형식으로 제안
+- 강요하지 않고 유저가 판단하도록 선택권 부여
+
+## 10. Mobile Performance Rules
 
 These rules apply specifically to Android / iOS targets and must never be skipped.
 
@@ -208,7 +229,45 @@ These rules apply specifically to Android / iOS targets and must never be skippe
 
 ---
 
-## 10. Scene Management & Initialization Order
+## 11. Manager Class Responsibility Rules
+
+### "Manager"라고 다 같은 Manager가 아니다
+Manager 클래스를 만들 때 반드시 아래 기준으로 역할을 분리한다.
+이름이 Manager라고 해서 여러 책임을 한 클래스에 몰아넣지 않는다.
+
+| 클래스 | 담당 책임 | DontDestroyOnLoad | 씬 범위 |
+|---|---|---|---|
+| `GameManager` | 씬 전환, 앱 생명주기, 전역 초기화 | ✅ | 전체 |
+| `InGameManager` | 인게임 세션 상태, 경과 시간, 게임오버 트리거 | ❌ | Game 씬 전용 |
+| `ScoreManager` | 점수 집계, 이벤트 발행 | ❌ | Game 씬 전용 |
+| `SaveManager` | PlayerPrefs / JSON 저장·불러오기 | ✅ | 전체 |
+| `AudioManager` | BGM / SFX 재생 | ✅ | 전체 |
+
+### 판단 기준 — 새 Manager를 만들기 전에 자문하라
+1. **이 클래스가 하는 일이 한 가지인가?** → 아니라면 분리
+2. **씬이 바뀌어도 유지되어야 하는가?** → Yes면 `DontDestroyOnLoad` + 싱글톤, No면 씬 전용
+3. **다른 Manager를 직접 호출하는가?** → 가능하면 이벤트(`C# Action`)로 교체
+4. **"GameManager에 넣으면 편하다"는 이유만으로 넣으려 하는가?** → 반드시 거부
+
+### 씬 전용 Manager 패턴
+```csharp
+// Game 씬 전용 Manager — DontDestroyOnLoad 없음
+private void Awake()
+{
+    if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+    Instance = this;
+    // NOTE: intentionally no DontDestroyOnLoad
+}
+
+private void OnDestroy()
+{
+    if (Instance == this) Instance = null; // 씬 언로드 시 ref 정리
+}
+```
+
+---
+
+## 12. Scene Management & Initialization Order
 
 ### DontDestroyOnLoad Objects
 Only the following Managers persist across scenes. All others must be destroyed and re-created:
@@ -243,7 +302,7 @@ Any script that subscribes to an event in `OnEnable()` or `Start()` **must** uns
 
 ---
 
-## 11. Constants & Tag Management
+## 13. Constants & Tag Management
 
 All tag strings, layer names, and global numeric constants must be defined in `Assets/Scripts/Utils/Constants.cs`. Never use raw string literals for tags or layers anywhere else in the codebase.
 
