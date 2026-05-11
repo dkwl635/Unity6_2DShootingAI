@@ -6,9 +6,14 @@ namespace ShooterGame.Enemy
     [CreateAssetMenu(fileName = "EnemyData", menuName = "ShooterGame/Enemy Data")]
     public class EnemyData : ScriptableObject
     {
-        [SerializeField] public int   baseHp        = 30;
-        [SerializeField] public float moveSpeed     = 3f;
-        [SerializeField] public int   scoreValue    = 10;
-        [SerializeField] public int   contactDamage = 1;
+        [SerializeField] private int   baseHp        = 30;
+        [SerializeField] private float moveSpeed     = 3f;
+        [SerializeField] private int   scoreValue    = 10;
+        [SerializeField] private int   contactDamage = 1;
+
+        public int   BaseHp        => baseHp;
+        public float MoveSpeed     => moveSpeed;
+        public int   ScoreValue    => scoreValue;
+        public int   ContactDamage => contactDamage;
     }
 }
