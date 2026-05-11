@@ -1,0 +1,153 @@
+================================================================================
+  INFINITE LOOP SHOOTER - Game Design Document
+  Version: v0.1 DRAFT
+  Platform: Mobile (Android / iOS)
+  Engine: Unity 2022.3 LTS
+  Genre: Infinite Roguelike Shooter
+================================================================================
+
+--------------------------------------------------------------------------------
+01 / CORE LOOP
+--------------------------------------------------------------------------------
+
+STEP 1 — FLY
+  Survive as long as possible while shooting down enemies.
+  The longer you survive, the harder it gets.
+
+STEP 2 — COLLECT
+  Pick up coins and EXP items dropped by defeated enemies.
+  Magnet upgrade auto-collects nearby coins.
+
+STEP 3 — GROW
+  [In-Game]  Choose 1 of 3 random upgrades on level-up. (Roguelike)
+  [Lobby]    Spend coins on permanent stat upgrades. (Metagame)
+
+STEP 4 — RECORD
+  Beat your best score (survival time or distance traveled).
+
+Loop: FLY -> COLLECT -> GROW -> RECORD -> FLY ...
+
+--------------------------------------------------------------------------------
+02 / SYSTEMS DESIGN
+--------------------------------------------------------------------------------
+
+[A] DIFFICULTY SYSTEM (DifficultyManager)
+  Base variable : float elapsedTime (seconds)
+  Spawn interval: Mathf.Clamp(baseInterval * exp(-k * t), minInterval, maxInterval)
+  Enemy speed   : Mathf.Clamp(baseSpeed + speedGain * t, baseSpeed, maxSpeed)
+  Mini-boss     : Triggered every 120 seconds
+
+[B] ENEMY PATTERN SYSTEM
+  Pattern           Description
+  ---------------   ---------------------------------------------------------
+  LinearDescent     Basic straight downward movement
+  ScreenSweep       Enemies sweep left to right across the screen
+  CircleTrap        Surround player, then close in toward center
+  MeteorShower      Indestructible obstacles - dodge only, cannot shoot down
+  FeverTime         Short invincibility bonus phase with mass coin drops
+
+  -> Patterns selected by weighted random draw via PatternData ScriptableObject
+
+[C] ECONOMY SYSTEM
+  Coin Drop     : CoinDrop prefab spawned on enemy death (Object Pool)
+  Magnet Effect : Auto-collect coins within radius (radius upgradeable)
+  Coin Multiplier: Adjustable via lobby permanent upgrades
+
+--------------------------------------------------------------------------------
+03 / UPGRADE SYSTEM
+--------------------------------------------------------------------------------
+
+[A] IN-GAME UPGRADES (Roguelike - per run)
+  On level-up: randomly select 3 from pool -> player picks 1 -> apply immediately
+  Managed via UpgradeData ScriptableObject + UpgradeType Enum
+  Rarity controlled by weight field on each UpgradeData asset.
+
+  Upgrade List (15+ total):
+  Name                Rarity    Weight  Description
+  ------------------  --------  ------  ----------------------------------------
+  Attack Speed Up     COMMON    0.20    Fire rate +15%
+  Damage Up           COMMON    0.18    Bullet damage +20%
+  Homing Missile      RARE      0.10    Add 1 homing missile per shot
+  Magnet Range Up     COMMON    0.15    Coin auto-collect radius +30%
+  EXP Gain Up         COMMON    0.14    EXP item value +20%
+  Double Shot         RARE      0.10    Fire 2 bullets simultaneously
+  Critical Rate Up    RARE      0.09    Critical hit chance +5%
+  Shield (1x)         RARE      0.08    Block 1 hit; recharge every 60 seconds
+  Piercing Shot       COMMON    0.12    Bullet pierces the first enemy hit
+  Side Wing           EPIC      0.04    Attach side craft; fires simultaneously
+
+  Enum (UpgradeType):
+    AttackSpeed, Damage, HomingMissile, MagnetRange, ExpGain,
+    DoubleShot, CriticalRate, Shield, PiercingShot, SideWing
+
+[B] LOBBY UPGRADES - METAGAME (permanent, spend coins)
+  Stat                Description                     Max LV  Start Cost
+  ------------------  ------------------------------  ------  ----------
+  Starting HP         +1 HP at game start             10      100 coins
+  Coin Multiplier     Drop coin value +5% per level   20      150 coins
+  Critical Rate       +1% crit chance per level       15      200 coins
+  EXP Gain            Level-up speed +4% per level    15      120 coins
+  Revive Slot         Auto-revive on death (no ad)    3       500 coins
+
+--------------------------------------------------------------------------------
+04 / 7-DAY DEVELOPMENT ROADMAP
+--------------------------------------------------------------------------------
+
+DAY  GOAL              CORE TASK                                       DELIVERABLE
+---  ----------------  ----------------------------------------------  -----------------
+01   Foundation        Infinite scroll, touch drag, basic shooting     PLAYABLE PROTOTYPE
+02   Infinite Spawn    EnemySpawner + DifficultyManager                DIFFICULTY SYSTEM
+03   Pattern Variety   5-7 enemy pattern scripts, weighted selection   7 PATTERNS
+04   Economy System    Coin drop, magnet, in-game level-up UI          UI + LEVEL UP
+05   Growth System     Lobby upgrade panel + SaveManager (JSON)        SAVE / LOAD
+06   Visual Polish     Effects, animation, CameraShake, SFX            VFX + SFX
+07   Balance & Ads     Revive-via-ad logic, final balance test, build  BUILD v1.0
+
+--------------------------------------------------------------------------------
+05 / AI PROMPT TEMPLATES
+--------------------------------------------------------------------------------
+
+[PROMPT 01 - Infinite Spawn]
+  "Write a Unity C# script using IEnumerator to infinitely spawn enemies.
+   spawnInterval should decrease over time, enemySpeed should increase.
+   Include Mathf.Clamp min/max guards. Use object pooling."
+
+  Expects: while(true) { yield return new WaitForSeconds(...) } pattern,
+           Mathf.Clamp safety guards, optional AnimationCurve.
+
+[PROMPT 02 - Upgrade System]
+  "Create an UpgradeData ScriptableObject for a roguelike shooter.
+   Manage upgrade types (AttackSpeed, Damage, Shield, etc.) via Enum.
+   Each entry needs: weight field, max stack count, icon slot.
+   Include a helper that does weighted random selection from an UpgradePool."
+
+  Expects: [CreateAssetMenu], UpgradeType enum,
+           weighted random picker helper in UpgradePool.
+
+[PROMPT 03 - Difficulty Curve]
+  "Write C# formulas where enemy HP, speed, and spawn frequency scale
+   exponentially with time t (in seconds).
+   Add a mini-boss trigger flag every 120 seconds."
+
+  Expects: Mathf.Pow(1.05f, t/60f) style functions x3,
+           boss trigger via C# Action event, optional OnGUI debug graph.
+
+--------------------------------------------------------------------------------
+06 / ANTI-BOREDOM / RETENTION HOOKS
+--------------------------------------------------------------------------------
+
+  EVERY 02:00    Mini-Boss
+                 A powerful mid-boss appears every 2 minutes.
+                 Breaks the rhythm and resets tension.
+
+  RANDOM TRIGGER Fever Time
+                 Short invincibility + mass coin drop.
+                 Gives the player a cathartic reward moment.
+
+  ON DEATH       Next-Run Promise
+                 Always show a clear next goal on the death screen:
+                 "Unlock this next time to go further."
+
+--------------------------------------------------------------------------------
+  // END OF DOCUMENT  |  v0.1 DRAFT  |  INSERT COIN TO CONTINUE
+--------------------------------------------------------------------------------
