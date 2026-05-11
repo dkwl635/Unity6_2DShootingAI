@@ -35,12 +35,17 @@ namespace ShooterGame.Core
 
         protected override void UpdateMovement()
         {
-            float offscreenX = Constants.PLAY_HALF_WIDTH + 2f;
+            float exitX = Constants.PLAY_HALF_WIDTH + 2f;
             for (int i = ActiveEnemies.Count - 1; i >= 0; i--)
             {
                 EnemyBase enemy = ActiveEnemies[i];
                 enemy.transform.Translate(_sweepDir * sweepSpeed * Time.deltaTime);
-                if (Mathf.Abs(enemy.transform.position.x) > offscreenX)
+
+                // Only release when crossing the DESTINATION edge (not spawn edge)
+                bool exitedRight = _sweepDir == Vector3.right && enemy.transform.position.x > exitX;
+                bool exitedLeft  = _sweepDir == Vector3.left  && enemy.transform.position.x < -exitX;
+
+                if (exitedRight || exitedLeft)
                     ReleaseEnemyManual(enemy);
             }
         }

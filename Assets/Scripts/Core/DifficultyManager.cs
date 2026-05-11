@@ -41,6 +41,17 @@ namespace ShooterGame.Core
             EnemyHpMultiplier    = 1f;
         }
 
+        private void Start()
+        {
+            if (InGameManager.Instance != null)
+                InGameManager.Instance.OnGameStart += ResetBossTimer;
+        }
+
+        private void ResetBossTimer()
+        {
+            _bossTimer = 0f;
+        }
+
         private void Update()
         {
             if (InGameManager.Instance == null || !InGameManager.Instance.IsGameRunning) return;
@@ -61,6 +72,8 @@ namespace ShooterGame.Core
 
         private void OnDestroy()
         {
+            if (InGameManager.Instance != null)
+                InGameManager.Instance.OnGameStart -= ResetBossTimer;
             if (Instance == this) Instance = null;
         }
     }
