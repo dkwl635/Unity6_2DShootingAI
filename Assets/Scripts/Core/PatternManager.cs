@@ -18,9 +18,10 @@ namespace ShooterGame.Core
         [SerializeField] private MiniBossPattern     miniBossPrefab;
         [SerializeField] private PatternConfig       miniBossConfig;
 
-        private PatternBase _activePattern;
-        private bool        _running;
-        private float       _patternTimer;
+        private PatternBase            _activePattern;
+        private bool                   _running;
+        private float                  _patternTimer;
+        private readonly List<PatternConfig> _eligible = new List<PatternConfig>();
 
         private void Awake()
         {
@@ -38,9 +39,15 @@ namespace ShooterGame.Core
                 if (InGameManager.Instance.IsGameRunning)
                     StartLoop();
             }
+            else
+            {
+                Debug.LogWarning("[PatternManager] InGameManager not found in scene.");
+            }
 
             if (DifficultyManager.Instance != null)
                 DifficultyManager.Instance.OnMiniBossSpawn += SpawnMiniBoss;
+            else
+                Debug.LogWarning("[PatternManager] DifficultyManager not found in scene.");
         }
 
         private void Update()
@@ -70,17 +77,17 @@ namespace ShooterGame.Core
         private void TrySpawnPattern()
         {
             float elapsed = InGameManager.Instance?.ElapsedTime ?? 0f;
-            List<PatternConfig> eligible = new List<PatternConfig>();
+            _eligible.Clear();
 
             foreach (PatternConfig cfg in patternConfigs)
             {
                 if (cfg != null && cfg.Kind != PatternType.MiniBoss && cfg.UnlockTime <= elapsed)
-                    eligible.Add(cfg);
+                    _eligible.Add(cfg);
             }
 
-            if (eligible.Count == 0) return;
+            if (_eligible.Count == 0) return;
 
-            PatternConfig selected = eligible[Random.Range(0, eligible.Count)];
+            PatternConfig selected = _eligible[Random.Range(0, _eligible.Count)];
             SpawnPattern(selected);
         }
 
@@ -118,6 +125,7 @@ namespace ShooterGame.Core
             }
         }
 
+        // Also called re-entrantly via StopLoop → ForceComplete → OnPatternComplete callback
         private void OnPatternDone()
         {
             if (_activePattern == null) return;
