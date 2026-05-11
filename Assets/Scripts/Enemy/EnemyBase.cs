@@ -22,7 +22,7 @@ namespace ShooterGame.Enemy
             _bottomBound = -(Constants.PLAY_HALF_HEIGHT + 1f);
         }
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             _released = false;
         }
@@ -45,11 +45,18 @@ namespace ShooterGame.Enemy
 
         protected virtual void Move() { }
 
-        public void TakeDamage(int dmg)
+        public virtual void TakeDamage(int dmg)
         {
             if (dmg <= 0 || _released) return;
             CurrentHp -= dmg;
             if (CurrentHp <= 0) Die();
+        }
+
+        public void ForceReturnToPool()
+        {
+            if (_released) return;
+            _released = true;
+            // Caller (PatternBase) handles pool.Release() directly
         }
 
         protected virtual void Die()
