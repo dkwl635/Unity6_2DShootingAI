@@ -1,4 +1,5 @@
 // Attach to: DifficultyManager GameObject (Game scene only — no DontDestroyOnLoad)
+using System;
 using UnityEngine;
 
 namespace ShooterGame.Core
@@ -19,6 +20,12 @@ namespace ShooterGame.Core
         // ── HP multiplier: linear ramp ───────────────────────────
         [SerializeField] private float hpGain       = 0.005f;
         [SerializeField] private float maxHpMult    = 5.0f;
+
+        // ── Mini-boss timer ──────────────────────────────────────
+        [SerializeField] private float bossInterval = 120f;
+
+        public event Action OnMiniBossSpawn;
+        private float _bossTimer;
 
         public float SpawnInterval        { get; private set; }
         public float EnemySpeedMultiplier { get; private set; }
@@ -43,6 +50,13 @@ namespace ShooterGame.Core
             SpawnInterval        = Mathf.Clamp(baseInterval * Mathf.Exp(-k * t), minInterval, baseInterval);
             EnemySpeedMultiplier = Mathf.Clamp(1f + speedGain * t, 1f, maxSpeedMult);
             EnemyHpMultiplier    = Mathf.Clamp(1f + hpGain * t,    1f, maxHpMult);
+
+            _bossTimer += Time.deltaTime;
+            if (_bossTimer >= bossInterval)
+            {
+                _bossTimer = 0f;
+                OnMiniBossSpawn?.Invoke();
+            }
         }
 
         private void OnDestroy()
