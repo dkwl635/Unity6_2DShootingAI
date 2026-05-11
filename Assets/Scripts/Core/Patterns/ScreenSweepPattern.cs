@@ -7,8 +7,10 @@ namespace ShooterGame.Core
 {
     public class ScreenSweepPattern : PatternBase
     {
-        [SerializeField] private float sweepSpeed   = 4f;
+        [SerializeField] private float sweepSpeed    = 4f;
         [SerializeField] private float enemySpacing = 1.5f;
+        [SerializeField] private float spawnMinY    = 0f;
+        [SerializeField] private float spawnMaxY    = 6f;
 
         private Vector3 _sweepDir;
 
@@ -21,7 +23,7 @@ namespace ShooterGame.Core
                 ? -(Constants.PLAY_HALF_WIDTH + enemySpacing * Config.EnemyCount)
                 :   Constants.PLAY_HALF_WIDTH + enemySpacing * Config.EnemyCount;
 
-            float y = Random.Range(-Constants.PLAY_HALF_HEIGHT * 0.5f, Constants.PLAY_HALF_HEIGHT * 0.5f);
+            float y = Random.Range(spawnMinY, spawnMaxY);
 
             for (int i = 0; i < Config.EnemyCount; i++)
             {

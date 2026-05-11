@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "unityMCP": {
+      "command": "C:\\Users\\dkwl6\\.local\\bin\\uvx.exe",
+      "args": [
+        "--from",
+        "mcpforunityserver==9.6.8",
+        "mcp-for-unity",
+        "--transport",
+        "stdio"
+      ],
+      "type": "stdio"
+    },
+    "ai-game-developer": {
+      "type": "stdio",
+      "args": [
+        "port=22887",
+        "plugin-timeout=10000",
+        "client-transport=stdio",
+        "authorization=none"
+      ],
+      "command": "C:/Unity/2DShootingAI/Library/mcp-server/win-x64/unity-mcp-server.exe"
+    }
+  }
+}

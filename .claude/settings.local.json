@@ -3,7 +3,16 @@
     "allow": [
       "Bash(git -C \"C:\\\\Unity\\\\2DShootingAI\" add \"Assets/Scripts/Enemy/EnemyBase.cs\")",
       "Bash(git -C 'C:\\\\Unity\\\\2DShootingAI' commit -m ' *)",
-      "Bash(Test-Path C:\\\\Unity\\\\2DShootingAI\\\\Assets\\\\Scripts\\\\Enemy\\\\Patterns *)"
+      "Bash(Test-Path C:\\\\Unity\\\\2DShootingAI\\\\Assets\\\\Scripts\\\\Enemy\\\\Patterns *)",
+      "Bash(git *)",
+      "mcp__unityMCP__batch_execute",
+      "mcp__unityMCP__manage_components",
+      "mcp__unityMCP__execute_code",
+      "mcp__unityMCP__manage_scene"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "unityMCP",
+    "ai-game-developer"
+  ]
 }
