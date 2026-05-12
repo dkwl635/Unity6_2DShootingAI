@@ -12,6 +12,7 @@ namespace ShooterGame.Player
         [SerializeField] private float magnetRadius = 1.5f;
         [SerializeField] private float attractSpeed = 8f;
         [SerializeField] private int   maxHits      = 80;
+        [SerializeField] private float detectInterval = 0.02f;
 
         private Collider2D[]   _hits;
         private WaitForSeconds _detectWait;
@@ -21,7 +22,7 @@ namespace ShooterGame.Player
             if (Instance != null && Instance != this) { Destroy(this); return; }
             Instance    = this;
             _hits       = new Collider2D[maxHits];
-            _detectWait = new WaitForSeconds(0.02f);
+            _detectWait = new WaitForSeconds(detectInterval);
         }
 
         private void OnEnable()  => StartCoroutine(DetectRoutine());
@@ -45,7 +46,7 @@ namespace ShooterGame.Player
             }
         }
 
-        public void IncreaseRadius(float amount) => magnetRadius += amount;
+        public void IncreaseRadius(float amount) => magnetRadius = Mathf.Max(0f, magnetRadius + amount);
 
         private void OnDestroy()
         {
