@@ -17,6 +17,9 @@ namespace ShooterGame.Enemy
         private float             _bottomBound;
         private bool              _released;
 
+        // Static event — DropManager subscribes without a direct reference to EnemyBase instances
+        public static event Action<Vector3, int, int> OnEnemyDied;
+
         private void Awake()
         {
             _bottomBound = -(Constants.PLAY_HALF_HEIGHT + 1f);
@@ -62,6 +65,7 @@ namespace ShooterGame.Enemy
         protected virtual void Die()
         {
             ScoreManager.Instance?.Add(_data.ScoreValue);
+            OnEnemyDied?.Invoke(transform.position, _data.CoinDrop, _data.ExpDrop);
             ReturnToPool();
         }
 
