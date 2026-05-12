@@ -53,6 +53,13 @@ namespace ShooterGame.Player
             IsInvincible = false;
         }
 
+        public void IncreaseMaxHp(int amount)
+        {
+            maxHp     += amount;
+            CurrentHp  = Mathf.Min(CurrentHp + amount, maxHp);
+            OnHpChanged?.Invoke(CurrentHp, maxHp);
+        }
+
         private void ResetHp()
         {
             CurrentHp    = maxHp;
