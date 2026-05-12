@@ -16,6 +16,13 @@ namespace ShooterGame.Player
         {
             if (joystick == null || spriteRenderer == null) return;
 
+            if (Time.timeScale == 0f)
+            {
+                spriteRenderer.sprite = idleSprite;
+                spriteRenderer.flipX  = false;
+                return;
+            }
+
             float horizontal = joystick.IsPressed ? joystick.Direction.x : 0f;
 
             if (Mathf.Abs(horizontal) > horizontalThreshold)
