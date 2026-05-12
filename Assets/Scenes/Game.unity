@@ -2648,6 +2648,7 @@ GameObject:
   - component: {fileID: 1873273334}
   - component: {fileID: 1873273333}
   - component: {fileID: 1873273339}
+  - component: {fileID: 1873273340}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -2777,6 +2778,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Player.PlayerStats
   maxHp: 3
   invincibleDuration: 1.5
+--- !u!114 &1873273340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873273332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43f0e67da8881f745b8d26d567c7d5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Player.MagnetEffect
+  magnetRadius: 1.5
+  attractSpeed: 8
+  maxHits: 80
 --- !u!1 &1879466789
 GameObject:
   m_ObjectHideFlags: 0
