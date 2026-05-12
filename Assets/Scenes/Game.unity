@@ -3742,10 +3742,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Player.PlayerSpriteController
   spriteRenderer: {fileID: 944501696}
-  idleSprite: {fileID: 0}
-  moveSprite: {fileID: 0}
+  idleSprite: {fileID: 826834212849771586, guid: 5b831ce774de7ff40b7e1d4dc9929298, type: 3}
+  moveSprite: {fileID: -7548686269071829716, guid: 5b831ce774de7ff40b7e1d4dc9929298, type: 3}
   joystick: {fileID: 1841966092}
-  horizontalThreshold: 0.1
+  horizontalThreshold: 0.5
 --- !u!1 &1879466789
 GameObject:
   m_ObjectHideFlags: 0

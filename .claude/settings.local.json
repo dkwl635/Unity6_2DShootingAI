@@ -8,7 +8,12 @@
       "mcp__unityMCP__batch_execute",
       "mcp__unityMCP__manage_components",
       "mcp__unityMCP__execute_code",
-      "mcp__unityMCP__manage_scene"
+      "mcp__unityMCP__manage_scene",
+      "mcp__unityMCP__read_console",
+      "mcp__unityMCP__manage_gameobject",
+      "mcp__unityMCP__find_gameobjects",
+      "mcp__unityMCP__manage_prefabs",
+      "mcp__unityMCP__manage_editor"
     ]
   },
   "enabledMcpjsonServers": [

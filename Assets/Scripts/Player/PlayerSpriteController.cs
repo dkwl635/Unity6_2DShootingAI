@@ -25,6 +25,7 @@ namespace ShooterGame.Player
 
             float horizontal = joystick.IsPressed ? joystick.Direction.x : 0f;
 
+           
             if (Mathf.Abs(horizontal) > horizontalThreshold)
             {
                 spriteRenderer.sprite  = moveSprite;
