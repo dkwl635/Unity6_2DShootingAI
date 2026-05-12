@@ -3583,6 +3583,7 @@ GameObject:
   - component: {fileID: 1873273333}
   - component: {fileID: 1873273339}
   - component: {fileID: 1873273340}
+  - component: {fileID: 1873273341}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -3728,6 +3729,23 @@ MonoBehaviour:
   attractSpeed: 8
   maxHits: 80
   detectInterval: 0.02
+--- !u!114 &1873273341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873273332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af2d137758d905b49a3ecca23897d032, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Player.PlayerSpriteController
+  spriteRenderer: {fileID: 944501696}
+  idleSprite: {fileID: 0}
+  moveSprite: {fileID: 0}
+  joystick: {fileID: 1841966092}
+  horizontalThreshold: 0.1
 --- !u!1 &1879466789
 GameObject:
   m_ObjectHideFlags: 0
