@@ -37,6 +37,7 @@ namespace ShooterGame.Economy
 
         private void SpawnCoin(Vector3 pos, int value)
         {
+            if (_coinPool == null) return;
             CoinDrop drop = _coinPool.Get();
             drop.SetValue(value);
             drop.Initialize(pos, () => _coinPool.Release(drop));
@@ -44,6 +45,7 @@ namespace ShooterGame.Economy
 
         private void SpawnExp(Vector3 pos, int value)
         {
+            if (_expPool == null) return;
             ExpDrop drop = _expPool.Get();
             drop.SetValue(value);
             drop.Initialize(pos, () => _expPool.Release(drop));
@@ -51,6 +53,12 @@ namespace ShooterGame.Economy
 
         private void OnDestroy()
         {
+            // Return all active drops to pool before scene unload
+            foreach (Transform child in transform)
+            {
+                if (child.gameObject.activeSelf)
+                    child.gameObject.SetActive(false);
+            }
             if (Instance == this) Instance = null;
         }
     }
