@@ -13,6 +13,9 @@ namespace ShooterGame.Economy
         private float  _bottomBound;
         private bool   _released;
 
+        private Transform _attractTarget;
+        private float     _attractSpeed;
+
         private void Awake()
         {
             _bottomBound = -(Constants.PLAY_HALF_HEIGHT + 1f);
@@ -20,7 +23,8 @@ namespace ShooterGame.Economy
 
         protected virtual void OnEnable()
         {
-            _released = false;
+            _released      = false;
+            _attractTarget = null;
         }
 
         public void Initialize(Vector3 position, Action onRelease)
@@ -32,7 +36,13 @@ namespace ShooterGame.Economy
         private void Update()
         {
             if (_released) return;
-            transform.Translate(Vector3.down * (fallSpeed * Time.deltaTime));
+
+            if (_attractTarget != null)
+                transform.position = Vector3.MoveTowards(
+                    transform.position, _attractTarget.position, _attractSpeed * Time.deltaTime);
+            else
+                transform.Translate(Vector3.down * (fallSpeed * Time.deltaTime));
+
             if (transform.position.y < _bottomBound)
                 ReturnToPool();
         }
@@ -47,12 +57,19 @@ namespace ShooterGame.Economy
             }
         }
 
+        public void Attract(Transform target, float speed)
+        {
+            _attractTarget = target;
+            _attractSpeed  = speed;
+        }
+
         protected abstract void OnCollect();
 
         protected void ReturnToPool()
         {
             if (_released) return;
-            _released = true;
+            _released      = true;
+            _attractTarget = null;
             _onRelease?.Invoke();
             _onRelease = null;
         }
