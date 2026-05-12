@@ -16,6 +16,7 @@ namespace ShooterGame.Player
         // Cached WaitForSeconds — never create 'new' inside coroutines
         private float _fireInterval;
         private float _fireTimer;
+        private int   _bulletDamage = 10;  // matches Bullet prefab's default damage
 
         private void Awake()
         {
@@ -41,12 +42,23 @@ namespace ShooterGame.Player
             bullet.transform.position = firePoint != null ? firePoint.position : transform.position;
             bullet.transform.rotation = Quaternion.identity;
             bullet.Initialize(BulletPool.Instance);
+            bullet.SetDamage(_bulletDamage);
         }
 
         /// <summary>Call from UpgradeManager to modify attack speed.</summary>
         public void SetFireRate(float newRate)
         {
             _fireInterval = Mathf.Max(0.05f, newRate); // floor to prevent zero-interval
+        }
+
+        public void IncreaseFireRate(float amount)
+        {
+            _fireInterval = Mathf.Max(0.05f, _fireInterval - amount);
+        }
+
+        public void IncreaseDamage(int amount)
+        {
+            _bulletDamage += amount;
         }
 
         private void OnDestroy()
