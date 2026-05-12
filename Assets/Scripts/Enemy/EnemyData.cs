@@ -10,10 +10,14 @@ namespace ShooterGame.Enemy
         [SerializeField] private float moveSpeed     = 3f;
         [SerializeField] private int   scoreValue    = 10;
         [SerializeField] private int   contactDamage = 1;
+        [SerializeField] private int   coinDrop      = 1;
+        [SerializeField] private int   expDrop       = 5;
 
         public int   BaseHp        => baseHp;
         public float MoveSpeed     => moveSpeed;
         public int   ScoreValue    => scoreValue;
         public int   ContactDamage => contactDamage;
+        public int   CoinDrop      => coinDrop;
+        public int   ExpDrop       => expDrop;
     }
 }
