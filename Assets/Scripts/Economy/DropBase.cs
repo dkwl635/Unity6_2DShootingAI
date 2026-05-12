@@ -9,12 +9,15 @@ namespace ShooterGame.Economy
     {
         [SerializeField] protected float fallSpeed = 2f;
 
+        [SerializeField] private float attractDelay = 0.4f;  // 스폰 직후 흡인 면역 시간
+
         private Action _onRelease;
         private float  _bottomBound;
         private bool   _released;
 
         private Transform _attractTarget;
         private float     _attractSpeed;
+        private float     _spawnTime;
 
         private void Awake()
         {
@@ -25,6 +28,7 @@ namespace ShooterGame.Economy
         {
             _released      = false;
             _attractTarget = null;
+            _spawnTime     = Time.time;
         }
 
         public void Initialize(Vector3 position, Action onRelease)
@@ -59,6 +63,7 @@ namespace ShooterGame.Economy
 
         public void Attract(Transform target, float speed)
         {
+            if (Time.time < _spawnTime + attractDelay) return;
             _attractTarget = target;
             _attractSpeed  = speed;
         }
