@@ -1,6 +1,7 @@
 // Attach to: Player GameObject
 
 using UnityEngine;
+using ShooterGame.Core;
 
 namespace ShooterGame.Player
 {
@@ -41,11 +42,12 @@ namespace ShooterGame.Player
             Bullet bullet = BulletPool.Instance.Get();
             if (bullet == null) return;
 
-            // Place bullet at fire point
             bullet.transform.position = firePoint != null ? firePoint.position : transform.position;
             bullet.transform.rotation = Quaternion.identity;
             bullet.Initialize(BulletPool.Instance);
             bullet.SetDamage(_bulletDamage);
+
+            AudioManager.Instance?.PlaySFX(SfxType.PlayerShoot);
         }
 
         /// <summary>Call from UpgradeManager to modify attack speed.</summary>

@@ -8,8 +8,9 @@ namespace ShooterGame.UI
 {
     public class GameOverPanel : MonoBehaviour
     {
-        [SerializeField] private Button _restartButton;
-        [SerializeField] private Button _lobbyButton;
+        [SerializeField] private Button          _restartButton;
+        [SerializeField] private Button          _lobbyButton;
+        [SerializeField] private VirtualJoystick _joystick;
 
         private CanvasGroup _group;
 
@@ -37,6 +38,12 @@ namespace ShooterGame.UI
             _group.interactable   = true;
             _group.blocksRaycasts = true;
             Time.timeScale = 0f;
+
+            if (_joystick != null)
+            {
+                _joystick.ResetInput();
+                _joystick.gameObject.SetActive(false);
+            }
         }
 
         private void OnRestart()

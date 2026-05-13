@@ -1,23 +1,23 @@
-// Attach to: ExpSystem GameObject (Game scene only — no DontDestroyOnLoad)
-// Level-up curve: expToNextLevel = baseExpPerLevel * currentLevel
+// Attach to: PowerSystem GameObject (Game scene only — no DontDestroyOnLoad)
+// Level-up curve: powerToNext = basePowerPerLevel * currentLevel
 using System;
 using UnityEngine;
 using ShooterGame.Core;
 
 namespace ShooterGame.Economy
 {
-    public class ExpSystem : MonoBehaviour
+    public class PowerSystem : MonoBehaviour
     {
-        public static ExpSystem Instance { get; private set; }
+        public static PowerSystem Instance { get; private set; }
 
-        public event Action<int, int> OnExpChanged;  // (currentExp, expToNext)
-        public event Action<int>      OnLevelUp;     // (newLevel) — Part 3 hook
+        public event Action<int, int> OnPowerChanged;  // (currentPower, powerToNext)
+        public event Action<int>      OnLevelUp;       // (newLevel)
 
-        [SerializeField] private int baseExpPerLevel = 10;
+        [SerializeField] private int basePowerPerLevel = 10;
 
-        public int CurrentExp   { get; private set; }
+        public int CurrentPower { get; private set; }
         public int CurrentLevel { get; private set; } = 1;
-        public int ExpToNext    => baseExpPerLevel * CurrentLevel;
+        public int PowerToNext  => basePowerPerLevel * CurrentLevel;
 
         private void Awake()
         {
@@ -28,35 +28,35 @@ namespace ShooterGame.Economy
         private void Start()
         {
             if (InGameManager.Instance != null)
-                InGameManager.Instance.OnGameStart += ResetExp;
+                InGameManager.Instance.OnGameStart += ResetPower;
         }
 
         public void Add(int amount)
         {
             if (amount <= 0) return;
-            CurrentExp += amount;
-            OnExpChanged?.Invoke(CurrentExp, ExpToNext);
+            CurrentPower += amount;
+            OnPowerChanged?.Invoke(CurrentPower, PowerToNext);
 
-            while (CurrentExp >= ExpToNext)
+            while (CurrentPower >= PowerToNext)
             {
-                CurrentExp -= ExpToNext;
+                CurrentPower -= PowerToNext;
                 CurrentLevel++;
                 OnLevelUp?.Invoke(CurrentLevel);
-                OnExpChanged?.Invoke(CurrentExp, ExpToNext);
+                OnPowerChanged?.Invoke(CurrentPower, PowerToNext);
             }
         }
 
-        private void ResetExp()
+        private void ResetPower()
         {
-            CurrentExp   = 0;
+            CurrentPower = 0;
             CurrentLevel = 1;
-            OnExpChanged?.Invoke(CurrentExp, ExpToNext);
+            OnPowerChanged?.Invoke(CurrentPower, PowerToNext);
         }
 
         private void OnDestroy()
         {
             if (InGameManager.Instance != null)
-                InGameManager.Instance.OnGameStart -= ResetExp;
+                InGameManager.Instance.OnGameStart -= ResetPower;
             if (Instance == this) Instance = null;
         }
     }

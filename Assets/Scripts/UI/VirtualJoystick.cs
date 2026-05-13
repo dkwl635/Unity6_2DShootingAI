@@ -1,4 +1,5 @@
-// Attach to: Joystick GameObject (child of Canvas)
+// Attach to: JoystickZone GameObject (large transparent panel covering the input area, child of Canvas)
+// background and handle are children of JoystickZone or separate visual children.
 
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -6,14 +7,14 @@ using UnityEngine.EventSystems;
 namespace ShooterGame.UI
 {
     /// <summary>
-    /// On-screen virtual joystick.
-    /// Handles all UI touch interaction and exposes a normalized direction vector.
-    /// PlayerController reads Direction to move the player — no direct coupling.
+    /// Floating virtual joystick — the background circle snaps to wherever the finger first touches.
+    /// The script must be on a large transparent RectTransform (the touch zone).
+    /// background / handle are purely visual and are moved at runtime.
     /// </summary>
     public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
     {
         // ── Inspector ─────────────────────────────────────────────
-        [SerializeField] private RectTransform background;  // outer circle
+        [SerializeField] private RectTransform background;  // outer circle (visual only)
         [SerializeField] private RectTransform handle;      // inner movable knob
 
         [Tooltip("How far the handle can move from the center (in UI pixels).")]
@@ -32,21 +33,40 @@ namespace ShooterGame.UI
         public bool IsPressed { get; private set; }
 
         // ── Private ───────────────────────────────────────────────
-        private Canvas    _canvas;
-        private Vector2   _bgCenter;   // background center in screen pixels
+        private Canvas        _canvas;
+        private RectTransform _parentRect;
+        private Vector2       _bgCenter;   // background center in screen pixels
 
         private void Awake()
         {
-            _canvas = GetComponentInParent<Canvas>();
+            _canvas     = GetComponentInParent<Canvas>();
+            _parentRect = background.parent as RectTransform;
+
+            // Hide background until the player touches
+            background.gameObject.SetActive(false);
+            handle.gameObject.SetActive(false);
         }
 
         // ── Pointer Events ────────────────────────────────────────
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            IsPressed  = true;
-            _bgCenter  = RectTransformUtility.WorldToScreenPoint(
+            IsPressed = true;
+
+            // Move background to the exact touch start position
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    _parentRect, eventData.position, eventData.pressEventCamera, out Vector2 localPoint))
+            {
+                background.anchoredPosition = localPoint;
+            }
+
+            background.gameObject.SetActive(true);
+            handle.gameObject.SetActive(true);
+
+            // Recalculate center after move
+            _bgCenter = RectTransformUtility.WorldToScreenPoint(
                 _canvas.worldCamera, background.position);
+
             OnDrag(eventData);
         }
 
@@ -66,8 +86,8 @@ namespace ShooterGame.UI
                 ? localOffset.normalized * handleRange
                 : localOffset;
 
-            // Move handle visually
-            handle.anchoredPosition = clampedOffset;
+            // Handle is a sibling of background, so offset must be relative to background's position
+            handle.anchoredPosition = background.anchoredPosition + clampedOffset;
 
             // Calculate normalized magnitude and apply dead zone
             float normalizedMag = Mathf.Clamp01(distance / handleRange);
@@ -86,12 +106,17 @@ namespace ShooterGame.UI
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            ResetInput();
+        }
+
+        public void ResetInput()
+        {
             IsPressed = false;
             Direction = Vector2.zero;
             Magnitude = 0f;
-
-            // Snap handle back to center
-            handle.anchoredPosition = Vector2.zero;
+            handle.anchoredPosition     = Vector2.zero;
+            background.gameObject.SetActive(false);
+            handle.gameObject.SetActive(false);
         }
     }
 }

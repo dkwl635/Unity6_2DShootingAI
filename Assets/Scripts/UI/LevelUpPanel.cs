@@ -7,8 +7,9 @@ namespace ShooterGame.UI
 {
     public class LevelUpPanel : MonoBehaviour
     {
-        [SerializeField] private Button[] cardButtons;  // exactly 3
-        [SerializeField] private Text[]   nameTexts;    // exactly 3, one per button
+        [SerializeField] private Button[]        cardButtons;  // exactly 3
+        [SerializeField] private Text[]          nameTexts;    // exactly 3, one per button
+        [SerializeField] private VirtualJoystick _joystick;
 
         private UpgradeData[] _currentPicks;
 
@@ -24,12 +25,22 @@ namespace ShooterGame.UI
             }
             gameObject.SetActive(true);
             Time.timeScale = 0f;
+
+            // 터치 중이라도 조이스틱 상태 초기화 후 비활성화
+            if (_joystick != null)
+            {
+                _joystick.ResetInput();
+                _joystick.gameObject.SetActive(false);
+            }
         }
 
         public void Hide()
         {
             Time.timeScale = 1f;
             gameObject.SetActive(false);
+
+            if (_joystick != null)
+                _joystick.gameObject.SetActive(true);
         }
 
         private void OnCardSelected(int index)

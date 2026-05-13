@@ -1,6 +1,8 @@
-// Attach to: CoinDrop prefab / ExpDrop prefab
+// Attach to: CoinDrop prefab / PowerDrop prefab
 using System;
 using UnityEngine;
+using ShooterGame.Core;
+using ShooterGame.Effects;
 using ShooterGame.Utils;
 
 namespace ShooterGame.Economy
@@ -56,6 +58,8 @@ namespace ShooterGame.Economy
             if (_released) return;
             if (other.CompareTag(Constants.TAG_PLAYER))
             {
+                EffectManager.Instance?.Play(PickupEffect, transform.position);
+                AudioManager.Instance?.PlaySFX(PickupSfx);
                 OnCollect();
                 ReturnToPool();
             }
@@ -69,6 +73,8 @@ namespace ShooterGame.Economy
         }
 
         protected abstract void OnCollect();
+        protected virtual EffectType PickupEffect => EffectType.CoinPickup;
+        protected virtual SfxType   PickupSfx    => SfxType.CoinPickup;
 
         protected void ReturnToPool()
         {

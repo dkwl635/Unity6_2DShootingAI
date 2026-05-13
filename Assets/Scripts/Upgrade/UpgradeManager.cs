@@ -1,6 +1,7 @@
 // Attach to: UpgradeManager GameObject (Game scene only — no DontDestroyOnLoad)
 using System.Collections.Generic;
 using UnityEngine;
+using ShooterGame.Core;
 using ShooterGame.Economy;
 using ShooterGame.Player;
 using ShooterGame.UI;
@@ -16,6 +17,8 @@ namespace ShooterGame.Upgrade
         [SerializeField] private PlayerShooter     playerShooter;
         [SerializeField] private PlayerStats       playerStats;
 
+        private const int MAX_HP_CAP = 8;
+
         private readonly List<UpgradeData> _eligible = new List<UpgradeData>(4);
 
         private void Awake()
@@ -26,12 +29,13 @@ namespace ShooterGame.Upgrade
 
         private void Start()
         {
-            if (ExpSystem.Instance != null)
-                ExpSystem.Instance.OnLevelUp += HandleLevelUp;
+            if (PowerSystem.Instance != null)
+                PowerSystem.Instance.OnLevelUp += HandleLevelUp;
         }
 
         private void HandleLevelUp(int newLevel)
         {
+            AudioManager.Instance?.PlaySFX(SfxType.LevelUp);
             UpgradeData[] picks = PickRandom(3);
             levelUpPanel.Show(picks);
         }
@@ -39,7 +43,13 @@ namespace ShooterGame.Upgrade
         private UpgradeData[] PickRandom(int count)
         {
             _eligible.Clear();
-            _eligible.AddRange(upgradePool);
+            foreach (var d in upgradePool)
+            {
+                // 최대 체력이 이미 상한이면 해당 업그레이드를 후보에서 제외
+                if (d.Type == UpgradeType.MaxHp && playerStats != null && playerStats.MaxHp >= MAX_HP_CAP)
+                    continue;
+                _eligible.Add(d);
+            }
 
             UpgradeData[] result = new UpgradeData[count];
             for (int i = 0; i < count && _eligible.Count > 0; i++)
@@ -73,8 +83,9 @@ namespace ShooterGame.Upgrade
                 case UpgradeType.Damage:
                     playerShooter.IncreaseDamage((int)data.Value);
                     break;
-                case UpgradeType.Shield:
-                    playerStats.IncreaseMaxHp((int)data.Value);
+                case UpgradeType.MaxHp:
+                    if (playerStats != null && playerStats.MaxHp < MAX_HP_CAP)
+                        playerStats.IncreaseMaxHp((int)data.Value);
                     break;
                 case UpgradeType.Magnet:
                     MagnetEffect.Instance?.IncreaseRadius(data.Value);
@@ -85,8 +96,8 @@ namespace ShooterGame.Upgrade
 
         private void OnDestroy()
         {
-            if (ExpSystem.Instance != null)
-                ExpSystem.Instance.OnLevelUp -= HandleLevelUp;
+            if (PowerSystem.Instance != null)
+                PowerSystem.Instance.OnLevelUp -= HandleLevelUp;
             if (Instance == this) Instance = null;
         }
     }

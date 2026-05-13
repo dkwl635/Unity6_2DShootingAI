@@ -25,7 +25,7 @@ namespace ShooterGame.Utils
         public const int POOL_SIZE_BULLET = 30;
         public const int POOL_SIZE_ENEMY  = 20;
         public const int POOL_SIZE_COIN   = 40;
-        public const int POOL_SIZE_EXP    = 40;
+        public const int POOL_SIZE_POWER  = 40;
         public const int POOL_SIZE_EFFECT = 20;
 
         // ── Reference Resolution ─────────────────────────────────

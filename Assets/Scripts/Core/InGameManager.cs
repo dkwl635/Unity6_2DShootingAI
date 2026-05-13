@@ -58,6 +58,7 @@ namespace ShooterGame.Core
         {
             ElapsedTime   = 0f;
             IsGameRunning = true;
+            AudioManager.Instance?.PlayGameBGM();
             OnGameStart?.Invoke();
         }
 
@@ -66,6 +67,7 @@ namespace ShooterGame.Core
             if (!IsGameRunning) return;
 
             IsGameRunning = false;
+            AudioManager.Instance?.StopBGM();
             OnGameOver?.Invoke();
 
             int finalScore  = ScoreManager.Instance != null ? ScoreManager.Instance.Score : 0;

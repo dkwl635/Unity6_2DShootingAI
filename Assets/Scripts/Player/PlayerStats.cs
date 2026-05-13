@@ -12,6 +12,7 @@ namespace ShooterGame.Player
         [SerializeField] private float invincibleDuration = 1.5f;
 
         public event Action<int, int> OnHpChanged; // (currentHp, maxHp)
+        public event Action           OnHit;       // fires whenever damage is actually taken
 
         public int  CurrentHp    { get; private set; }
         public int  MaxHp        { get; private set; }
@@ -38,9 +39,13 @@ namespace ShooterGame.Player
 
             CurrentHp = Mathf.Max(0, CurrentHp - dmg);
             OnHpChanged?.Invoke(CurrentHp, maxHp);
+            OnHit?.Invoke();
+            CameraShake.Instance?.ShakeHit();
+            AudioManager.Instance?.PlaySFX(SfxType.PlayerHit);
 
             if (CurrentHp <= 0)
             {
+                AudioManager.Instance?.PlaySFX(SfxType.GameOver);
                 InGameManager.Instance?.TriggerGameOver();
                 return;
             }

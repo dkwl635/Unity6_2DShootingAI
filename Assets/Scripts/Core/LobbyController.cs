@@ -6,9 +6,15 @@ namespace ShooterGame.Core
 {
     public class LobbyController : MonoBehaviour
     {
+        private void Start()
+        {
+            AudioManager.Instance?.PlayLobbyBGM();
+        }
+
         public void OnPlayButtonClicked()
         {
-            SceneManager.LoadScene("Game");
+            AudioManager.Instance?.PlaySFX(SfxType.ButtonClick);
+            GameManager.Instance.LoadGameScene();
         }
     }
 }

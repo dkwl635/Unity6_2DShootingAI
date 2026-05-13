@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using ShooterGame.Core;
+using ShooterGame.Effects;
 using ShooterGame.Player;
 using ShooterGame.Utils;
 
@@ -94,8 +95,10 @@ namespace ShooterGame.Enemy
 
         protected virtual void Die()
         {
+            EffectManager.Instance?.Play(EffectType.Explosion, transform.position);
+            AudioManager.Instance?.PlaySFX(SfxType.EnemyDeath);
             ScoreManager.Instance?.Add(_data.ScoreValue);
-            OnEnemyDied?.Invoke(transform.position, _data.CoinDrop, _data.ExpDrop);
+            OnEnemyDied?.Invoke(transform.position, _data.CoinDrop, _data.PowerDrop);
             ReturnToPool();
         }
 

@@ -11,7 +11,7 @@ namespace ShooterGame.UI
     public class DebugStatPanel : MonoBehaviour
     {
         [SerializeField] private Text levelText;
-        [SerializeField] private Text expText;
+        [SerializeField] private Text powerText;
         [SerializeField] private Text hpText;
         [SerializeField] private Text upgradeText;
 
@@ -42,11 +42,11 @@ namespace ShooterGame.UI
 
         private void Refresh()
         {
-            // Level & EXP
-            if (ExpSystem.Instance != null)
+            // Level & POWER
+            if (PowerSystem.Instance != null)
             {
-                levelText.text = $"LV {ExpSystem.Instance.CurrentLevel}";
-                expText.text   = $"EXP  {ExpSystem.Instance.CurrentExp} / {ExpSystem.Instance.ExpToNext}";
+                levelText.text = $"LV {PowerSystem.Instance.CurrentLevel}";
+                powerText.text = $"POWER  {PowerSystem.Instance.CurrentPower} / {PowerSystem.Instance.PowerToNext}";
             }
 
             // HP

@@ -1,6 +1,7 @@
 // Attach to: Bullet Prefab
 
 using UnityEngine;
+using ShooterGame.Effects;
 using ShooterGame.Enemy;
 
 namespace ShooterGame.Player
@@ -44,6 +45,7 @@ namespace ShooterGame.Player
         {
             if (other.CompareTag(Utils.Constants.TAG_ENEMY))
             {
+                EffectManager.Instance?.Play(EffectType.BulletHit, transform.position);
                 EnemyBase enemy = other.GetComponent<EnemyBase>();
                 enemy?.TakeDamage(damage);
                 ReturnToPool();

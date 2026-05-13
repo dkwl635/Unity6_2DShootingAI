@@ -5,7 +5,7 @@ namespace ShooterGame.Upgrade
     {
         AttackSpeed,
         Damage,
-        Shield,
+        MaxHp,
         Magnet
     }
 }
