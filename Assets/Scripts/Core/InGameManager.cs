@@ -3,6 +3,7 @@
 
 using System;
 using UnityEngine;
+using ShooterGame.Economy;
 using ShooterGame.Meta;
 using ShooterGame.Player;
 
@@ -67,8 +68,10 @@ namespace ShooterGame.Core
             IsGameRunning = false;
             OnGameOver?.Invoke();
 
-            int finalScore = ScoreManager.Instance != null ? ScoreManager.Instance.Score : 0;
+            int finalScore  = ScoreManager.Instance != null ? ScoreManager.Instance.Score : 0;
+            int earnedCoins = CoinSystem.Instance  != null ? CoinSystem.Instance.Total   : 0;
             SaveManager.Instance?.TrySaveBestScore(finalScore);
+            SaveManager.Instance?.AddCoins(earnedCoins);
         }
 
         // ── Private ──────────────────────────────────────────────
