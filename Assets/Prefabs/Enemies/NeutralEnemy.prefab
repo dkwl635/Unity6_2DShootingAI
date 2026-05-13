@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b96126282e2ce1840b7113a67061e1be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Enemy.EnemyBase
+  hitFlashMaterial: {fileID: 2100000, guid: c909000f88f445746bce844108e666c2, type: 2}
+  flashDuration: 0.08
 --- !u!58 &4573244170807240529
 CircleCollider2D:
   m_ObjectHideFlags: 0

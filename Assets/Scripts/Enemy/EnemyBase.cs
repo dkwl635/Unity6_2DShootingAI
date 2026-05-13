@@ -1,5 +1,6 @@
 // Attach to: Enemy Prefab root
 using System;
+using System.Collections;
 using UnityEngine;
 using ShooterGame.Core;
 using ShooterGame.Player;
@@ -12,10 +13,18 @@ namespace ShooterGame.Enemy
         protected int   CurrentHp;
         protected float CurrentSpeed;
 
+        [SerializeField] private Material hitFlashMaterial;
+        [SerializeField] private float    flashDuration = 0.08f;
+
         private EnemyData         _data;
         private Action<EnemyBase> _releaseCallback;
         private float             _bottomBound;
         private bool              _released;
+        private bool              _isFlashing;
+
+        private SpriteRenderer _renderer;
+        private Material       _originalMaterial;
+        private WaitForSeconds _flashWait;
 
         // Static event — DropManager subscribes without a direct reference to EnemyBase instances
         public static event Action<Vector3, int, int> OnEnemyDied;
@@ -23,11 +32,18 @@ namespace ShooterGame.Enemy
         private void Awake()
         {
             _bottomBound = -(Constants.PLAY_HALF_HEIGHT + 1f);
+            _renderer    = GetComponent<SpriteRenderer>();
+            _flashWait   = new WaitForSeconds(flashDuration);
+            if (_renderer != null)
+                _originalMaterial = _renderer.sharedMaterial;
         }
 
         protected virtual void OnEnable()
         {
-            _released = false;
+            _released   = false;
+            _isFlashing = false;
+            if (_renderer != null && _originalMaterial != null)
+                _renderer.sharedMaterial = _originalMaterial;
         }
 
         public void Initialize(EnemyData data, float hpMultiplier, float speedMultiplier,
@@ -52,7 +68,21 @@ namespace ShooterGame.Enemy
         {
             if (dmg <= 0 || _released) return;
             CurrentHp -= dmg;
-            if (CurrentHp <= 0) Die();
+            if (CurrentHp <= 0) { Die(); return; }
+            if (!_isFlashing) StartCoroutine(HitFlash());
+        }
+
+        private IEnumerator HitFlash()
+        {
+            _isFlashing = true;
+            if (_renderer != null && hitFlashMaterial != null)
+                _renderer.sharedMaterial = hitFlashMaterial;
+
+            yield return _flashWait;
+
+            if (_renderer != null && _originalMaterial != null)
+                _renderer.sharedMaterial = _originalMaterial;
+            _isFlashing = false;
         }
 
         public void ForceReturnToPool()

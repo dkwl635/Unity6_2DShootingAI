@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77431f7a2332d2f47992b57a4454a333, type: 3}
   m_Name: BasicEnemy
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Enemy.EnemyData
-  baseHp: 1
+  baseHp: 20
   moveSpeed: 3
   scoreValue: 10
   contactDamage: 1
+  coinDrop: 1
+  expDrop: 5

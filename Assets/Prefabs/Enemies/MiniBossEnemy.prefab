@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e13c8657e69d814f9ade0493334104f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Enemy.MiniBossEnemy
+  hitFlashMaterial: {fileID: 2100000, guid: c909000f88f445746bce844108e666c2, type: 2}
+  flashDuration: 0.08
   sweepFrequency: 1.5
   sweepAmplitude: 3
 --- !u!58 &570081614108900755

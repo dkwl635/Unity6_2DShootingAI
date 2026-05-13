@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3eb62f1b219761948aa3515c8865293e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Enemy.LinearDescentEnemy
+  hitFlashMaterial: {fileID: 2100000, guid: c909000f88f445746bce844108e666c2, type: 2}
+  flashDuration: 0.08
 --- !u!58 &8399428450692796000
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -108,7 +110,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 9452ae1262a74094f8a68013fbcd1834, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
