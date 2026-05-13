@@ -46,7 +46,16 @@ namespace ShooterGame.Player
             }
         }
 
+        public float MagnetRadius => magnetRadius;
+
         public void IncreaseRadius(float amount) => magnetRadius = Mathf.Max(0f, magnetRadius + amount);
+
+        /// <summary>게임 시작 시 InGameManager가 한 번 호출. totalGain = gainPerLevel * level.</summary>
+        public void ApplyPermanentMagnetBonus(float totalGain)
+        {
+            if (totalGain <= 0f) return;
+            IncreaseRadius(totalGain);
+        }
 
         private void OnDestroy()
         {

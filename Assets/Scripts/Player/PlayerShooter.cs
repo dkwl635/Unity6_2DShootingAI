@@ -18,6 +18,9 @@ namespace ShooterGame.Player
         private float _fireTimer;
         private int   _bulletDamage = 10;  // matches Bullet prefab's default damage
 
+        public float FireInterval => _fireInterval;
+        public int   BulletDamage => _bulletDamage;
+
         private void Awake()
         {
             _fireInterval = fireRate;
@@ -59,6 +62,20 @@ namespace ShooterGame.Player
         public void IncreaseDamage(int amount)
         {
             _bulletDamage += amount;
+        }
+
+        /// <summary>게임 시작 시 InGameManager가 한 번 호출. totalGain = gainPerLevel * level.</summary>
+        public void ApplyPermanentDamageBonus(int totalGain)
+        {
+            if (totalGain <= 0) return;
+            IncreaseDamage(totalGain);
+        }
+
+        /// <summary>totalReduction = gainPerLevel * level (초 단위 감소량).</summary>
+        public void ApplyPermanentAtkSpeedBonus(float totalReduction)
+        {
+            if (totalReduction <= 0f) return;
+            IncreaseFireRate(totalReduction);
         }
 
         private void OnDestroy()

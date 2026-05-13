@@ -14,12 +14,14 @@ namespace ShooterGame.Player
         public event Action<int, int> OnHpChanged; // (currentHp, maxHp)
 
         public int  CurrentHp    { get; private set; }
+        public int  MaxHp        { get; private set; }
         public bool IsInvincible { get; private set; }
 
         private WaitForSeconds _invincibleWait;
 
         private void Awake()
         {
+            MaxHp     = maxHp;
             CurrentHp = maxHp;
             _invincibleWait = new WaitForSeconds(invincibleDuration);
         }
@@ -56,12 +58,21 @@ namespace ShooterGame.Player
         public void IncreaseMaxHp(int amount)
         {
             maxHp     += amount;
+            MaxHp      = maxHp;
             CurrentHp  = Mathf.Min(CurrentHp + amount, maxHp);
             OnHpChanged?.Invoke(CurrentHp, maxHp);
         }
 
+        /// <summary>게임 시작 시 InGameManager가 한 번 호출. totalGain = gainPerLevel * level.</summary>
+        public void ApplyPermanentHpBonus(int totalGain)
+        {
+            if (totalGain <= 0) return;
+            IncreaseMaxHp(totalGain);
+        }
+
         private void ResetHp()
         {
+            MaxHp        = maxHp;
             CurrentHp    = maxHp;
             IsInvincible = false;
             OnHpChanged?.Invoke(CurrentHp, maxHp);
