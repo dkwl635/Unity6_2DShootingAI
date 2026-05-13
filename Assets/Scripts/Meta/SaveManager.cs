@@ -13,12 +13,11 @@ namespace ShooterGame.Meta
         public static SaveManager Instance { get; private set; }
 
         // ── Cached Data ──────────────────────────────────────────
-        public int BestScore   { get; private set; }
-        public int TotalCoins  { get; private set; }
+        public int BestScore  { get; private set; }
+        public int TotalCoins { get; private set; }
 
         private void Awake()
         {
-            // Singleton duplicate guard
             if (Instance != null && Instance != this)
             {
                 Destroy(gameObject);
@@ -26,7 +25,6 @@ namespace ShooterGame.Meta
             }
             Instance = this;
             DontDestroyOnLoad(gameObject);
-
             LoadAll();
         }
 
@@ -36,7 +34,6 @@ namespace ShooterGame.Meta
         public void TrySaveBestScore(int score)
         {
             if (score <= BestScore) return;
-
             BestScore = score;
             PlayerPrefs.SetInt(Constants.PREF_BEST_SCORE, BestScore);
             PlayerPrefs.Save();
@@ -46,9 +43,26 @@ namespace ShooterGame.Meta
         public void AddCoins(int amount)
         {
             if (amount <= 0) return;
-
             TotalCoins += amount;
             PlayerPrefs.SetInt(Constants.PREF_TOTAL_COINS, TotalCoins);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>코인 차감 — 잔액이 부족하면 0으로 클램프.</summary>
+        public void SpendCoins(int cost)
+        {
+            if (cost <= 0) return;
+            TotalCoins = Mathf.Max(0, TotalCoins - cost);
+            PlayerPrefs.SetInt(Constants.PREF_TOTAL_COINS, TotalCoins);
+            PlayerPrefs.Save();
+        }
+
+        public int GetUpgradeLevel(LobbyUpgradeType type)
+            => PlayerPrefs.GetInt(Constants.PREF_LOBBY_UPGRADE + (int)type, 0);
+
+        public void SetUpgradeLevel(LobbyUpgradeType type, int level)
+        {
+            PlayerPrefs.SetInt(Constants.PREF_LOBBY_UPGRADE + (int)type, level);
             PlayerPrefs.Save();
         }
 
@@ -66,6 +80,7 @@ namespace ShooterGame.Meta
         {
             BestScore  = PlayerPrefs.GetInt(Constants.PREF_BEST_SCORE,  0);
             TotalCoins = PlayerPrefs.GetInt(Constants.PREF_TOTAL_COINS, 0);
+            // upgrade levels are read on-demand via GetUpgradeLevel()
         }
 
         private void OnDestroy()
