@@ -17,8 +17,9 @@ namespace ShooterGame.Utils
         public const string LAYER_BULLET = "Bullet";
 
         // ── PlayerPrefs Keys ────────────────────────────────────
-        public const string PREF_BEST_SCORE  = "BestScore";
-        public const string PREF_TOTAL_COINS = "TotalCoins";
+        public const string PREF_BEST_SCORE    = "BestScore";
+        public const string PREF_TOTAL_COINS  = "TotalCoins";
+        public const string PREF_LOBBY_UPGRADE = "LobbyUpgrade_"; // append (int)LobbyUpgradeType
 
         // ── Object Pool Default Sizes ───────────────────────────
         public const int POOL_SIZE_BULLET = 30;
