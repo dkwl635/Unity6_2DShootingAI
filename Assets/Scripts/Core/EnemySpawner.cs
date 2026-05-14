@@ -57,6 +57,23 @@ namespace ShooterGame.Core
             }
         }
 
+        // Temporary pause during boss phase — does not unsubscribe lifecycle events
+        public void PauseSpawning()
+        {
+            if (!_spawning) return;
+            _spawning = false;
+            if (_spawnCoroutine != null)
+            {
+                StopCoroutine(_spawnCoroutine);
+                _spawnCoroutine = null;
+            }
+        }
+
+        public void ResumeSpawning()
+        {
+            StartSpawning();
+        }
+
         private IEnumerator SpawnLoop()
         {
             float timer = 0f;
