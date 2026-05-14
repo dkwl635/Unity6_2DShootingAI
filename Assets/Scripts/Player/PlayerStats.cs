@@ -16,6 +16,7 @@ namespace ShooterGame.Player
 
         public int  CurrentHp    { get; private set; }
         public int  MaxHp        { get; private set; }
+        public int  BaseMaxHp    { get; private set; }  // 로비 보너스 적용 후 기준값
         public bool IsInvincible { get; private set; }
 
         private WaitForSeconds _invincibleWait;
@@ -23,6 +24,7 @@ namespace ShooterGame.Player
         private void Awake()
         {
             MaxHp     = maxHp;
+            BaseMaxHp = maxHp;
             CurrentHp = maxHp;
             _invincibleWait = new WaitForSeconds(invincibleDuration);
         }
@@ -73,6 +75,7 @@ namespace ShooterGame.Player
         {
             if (totalGain <= 0) return;
             IncreaseMaxHp(totalGain);
+            BaseMaxHp = MaxHp;  // 로비 보너스 반영 후 기준 고정
         }
 
         private void ResetHp()

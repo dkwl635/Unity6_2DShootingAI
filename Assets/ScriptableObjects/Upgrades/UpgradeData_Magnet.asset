@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: UpgradeData_Magnet
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Upgrade.UpgradeData
   upgradeName: "\uC790\uC11D \uD655\uC7A5"
+  icon: {fileID: 6437814916200371564, guid: beacc98bba91d83479471607ccc644ed, type: 3}
   type: 3
   value: 1
   weight: 5
+  maxLevel: 8

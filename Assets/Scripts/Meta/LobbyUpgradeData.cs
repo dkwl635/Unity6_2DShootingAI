@@ -8,6 +8,9 @@ namespace ShooterGame.Meta
     {
         [SerializeField] private LobbyUpgradeType _upgradeType;
         [SerializeField] private string           _displayName    = "업그레이드";
+        [SerializeField] private string           _description    = "";
+        [SerializeField] private Sprite           _icon;
+        [SerializeField] private string           _statUnit       = "";
         [SerializeField] private int              _maxLevel       = 5;
         [SerializeField] private int              _baseCost       = 100;
         [SerializeField] private float            _costMultiplier = 2f;
@@ -15,6 +18,9 @@ namespace ShooterGame.Meta
 
         public LobbyUpgradeType UpgradeType  => _upgradeType;
         public string           DisplayName  => _displayName;
+        public string           Description  => _description;
+        public Sprite           Icon         => _icon;
+        public string           StatUnit     => _statUnit;
         public int              MaxLevel     => _maxLevel;
         public float            GainPerLevel => _gainPerLevel;
 

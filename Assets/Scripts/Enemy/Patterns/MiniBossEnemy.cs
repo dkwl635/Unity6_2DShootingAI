@@ -15,7 +15,6 @@ namespace ShooterGame.Enemy
         [Header("Shooting")]
         [SerializeField] private float fireInterval  = 2f;
         [SerializeField] private float spreadAngle   = 20f;
-        [SerializeField] private int   bulletDamage  = 5;
 
         private bool           _reachedCenter;
         private float          _sweepTimer;
@@ -88,7 +87,7 @@ namespace ShooterGame.Enemy
             bullet.transform.position = transform.position;
             // z = 180 → straight down; ±offset tilts left/right
             bullet.transform.rotation = Quaternion.Euler(0f, 0f, 180f + angleOffset);
-            bullet.Initialize(EnemyBulletPool.Instance, bulletDamage);
+            bullet.Initialize(EnemyBulletPool.Instance);
         }
     }
 }

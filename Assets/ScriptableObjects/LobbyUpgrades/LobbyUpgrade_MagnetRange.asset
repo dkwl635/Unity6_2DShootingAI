@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Meta.LobbyUpgradeData
   _upgradeType: 3
   _displayName: "\uB9C8\uADF8\uB137 \uBC94\uC704"
+  _description: "\uC790\uB3D9 \uD76D\uB4DD \uBC94\uC704 \uC99D\uAC00"
+  _icon: {fileID: 6437814916200371564, guid: beacc98bba91d83479471607ccc644ed, type: 3}
+  _statUnit: 
   _maxLevel: 5
   _baseCost: 100
   _costMultiplier: 2

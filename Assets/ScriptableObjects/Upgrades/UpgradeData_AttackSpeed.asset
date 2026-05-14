@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: UpgradeData_AttackSpeed
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Upgrade.UpgradeData
   upgradeName: "\uACF5\uACA9\uC18D\uB3C4 \uD5A5\uC0C1"
+  icon: {fileID: 9008779678210203621, guid: beacc98bba91d83479471607ccc644ed, type: 3}
   type: 0
   value: 0.05
   weight: 10
+  maxLevel: 8

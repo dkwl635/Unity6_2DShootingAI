@@ -17,9 +17,11 @@ namespace ShooterGame.Upgrade
         [SerializeField] private PlayerShooter     playerShooter;
         [SerializeField] private PlayerStats       playerStats;
 
-        private const int MAX_HP_CAP = 8;
+        private readonly List<UpgradeData>           _eligible      = new List<UpgradeData>(4);
+        private readonly Dictionary<UpgradeType, int> _appliedCounts = new Dictionary<UpgradeType, int>();
 
-        private readonly List<UpgradeData> _eligible = new List<UpgradeData>(4);
+        public int GetAppliedCount(UpgradeType type)
+            => _appliedCounts.TryGetValue(type, out int c) ? c : 0;
 
         private void Awake()
         {
@@ -45,10 +47,7 @@ namespace ShooterGame.Upgrade
             _eligible.Clear();
             foreach (var d in upgradePool)
             {
-                // 최대 체력이 이미 상한이면 해당 업그레이드를 후보에서 제외
-                if (d.Type == UpgradeType.MaxHp && playerStats != null && playerStats.MaxHp >= MAX_HP_CAP)
-                    continue;
-                if (d.Type == UpgradeType.MissileCount && playerShooter != null && playerShooter.MissileStage >= 4)
+                if (d.MaxLevel > 0 && GetAppliedCount(d.Type) >= d.MaxLevel)
                     continue;
                 _eligible.Add(d);
             }
@@ -86,8 +85,7 @@ namespace ShooterGame.Upgrade
                     playerShooter.IncreaseDamage((int)data.Value);
                     break;
                 case UpgradeType.MaxHp:
-                    if (playerStats != null && playerStats.MaxHp < MAX_HP_CAP)
-                        playerStats.IncreaseMaxHp((int)data.Value);
+                    playerStats?.IncreaseMaxHp((int)data.Value);
                     break;
                 case UpgradeType.Magnet:
                     MagnetEffect.Instance?.IncreaseRadius(data.Value);
@@ -96,6 +94,7 @@ namespace ShooterGame.Upgrade
                     playerShooter.IncreaseMissileStage();
                     break;
             }
+            _appliedCounts[data.Type] = GetAppliedCount(data.Type) + 1;
             levelUpPanel.Hide();
         }
 

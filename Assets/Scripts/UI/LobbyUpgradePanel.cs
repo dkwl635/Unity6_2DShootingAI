@@ -1,13 +1,14 @@
 // Attach to: LobbyUpgradePanel GameObject
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using ShooterGame.Meta;
 
 namespace ShooterGame.UI
 {
     public class LobbyUpgradePanel : MonoBehaviour
     {
-        [SerializeField] private Text               _coinText;
+        [SerializeField] private TMP_Text               _coinText;
         // 슬롯 배열: 인덱스 0=MaxHp, 1=Damage, 2=AttackSpeed, 3=MagnetRange
         [SerializeField] private LobbyUpgradeSlot[] _slots;
 
@@ -30,12 +31,12 @@ namespace ShooterGame.UI
         private void RefreshAll()
         {
             int coins      = SaveManager.Instance.TotalCoins;
-            _coinText.text = "보유 코인: " + coins;
+            _coinText.text = coins.ToString();
 
             for (int i = 0; i < 4; i++)
             {
                 int level = SaveManager.Instance.GetUpgradeLevel((LobbyUpgradeType)i);
-                _slots[i].Render(_datas[i], level, coins);
+                _slots[i].Render(_datas[i], level);
             }
         }
 

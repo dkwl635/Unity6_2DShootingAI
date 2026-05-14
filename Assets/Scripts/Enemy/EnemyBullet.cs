@@ -10,16 +10,14 @@ namespace ShooterGame.Enemy
         [SerializeField] private float moveSpeed = 7f;
 
         private EnemyBulletPool _pool;
-        private int             _damage;
         private float           _bottomBound;
         private bool            _released;
 
         private static Camera _cam;
 
-        public void Initialize(EnemyBulletPool pool, int damage)
+        public void Initialize(EnemyBulletPool pool)
         {
-            _pool    = pool;
-            _damage  = damage;
+            _pool     = pool;
             _released = false;
 
             if (_cam == null) _cam = Camera.main;
@@ -39,7 +37,7 @@ namespace ShooterGame.Enemy
             if (_released) return;
             if (other.CompareTag(Constants.TAG_PLAYER))
             {
-                other.GetComponent<PlayerStats>()?.TakeDamage(_damage);
+                other.GetComponent<PlayerStats>()?.TakeDamage(1);
                 ReturnToPool();
             }
         }

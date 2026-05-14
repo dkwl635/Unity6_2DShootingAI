@@ -38,7 +38,7 @@ namespace ShooterGame.Enemy
 
         [Header("Shared")]
         [SerializeField] private float spreadAngle  = 20f;
-        [SerializeField] private int   bulletDamage = 8;
+
 
         public static FinalBossEnemy ActiveBoss { get; private set; }
 
@@ -66,7 +66,7 @@ namespace ShooterGame.Enemy
             _reachedCenter  = false;
             _sweepTimer     = 0f;
             _isPhase2       = false;
-            _isInvincible   = false;
+            _isInvincible   = true;   // 하강 중 무적
             _isDying        = false;
             _shootCoroutine = null;
             _phase1Wait     = new WaitForSeconds(phase1FireInterval);
@@ -121,6 +121,7 @@ namespace ShooterGame.Enemy
                 if (Mathf.Abs(transform.position.y - bossCenterY) < 0.05f)
                 {
                     _reachedCenter  = true;
+                    _isInvincible   = false;
                     _shootCoroutine = StartCoroutine(ShootLoop());
                 }
             }
@@ -236,7 +237,7 @@ namespace ShooterGame.Enemy
             if (bullet == null) return;
             bullet.transform.position = transform.position;
             bullet.transform.rotation = Quaternion.Euler(0f, 0f, 180f + angleOffset);
-            bullet.Initialize(EnemyBulletPool.Instance, bulletDamage);
+            bullet.Initialize(EnemyBulletPool.Instance);
         }
     }
 }

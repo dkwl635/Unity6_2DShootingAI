@@ -115,7 +115,7 @@ namespace ShooterGame.Player
 
         public void IncreaseMissileStage()
         {
-            _missileStage = Mathf.Min(_missileStage + 1, 4);
+            _missileStage++;
         }
 
         private void OnDestroy()

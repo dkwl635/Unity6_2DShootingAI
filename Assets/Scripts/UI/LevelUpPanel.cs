@@ -1,15 +1,12 @@
-// Attach to: LevelUpPanel GameObject (Canvas child, default inactive)
+// Attach to: LevelUpPanel GameObject (Canvas child, default active, alpha=0)
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using ShooterGame.Upgrade;
 
 namespace ShooterGame.UI
 {
     public class LevelUpPanel : MonoBehaviour
     {
-        [SerializeField] private Button[]        cardButtons;  // exactly 3
-        [SerializeField] private TMP_Text[]          nameTexts;    // exactly 3, one per button
+        [SerializeField] private LevelUpCard[]   _cards;     // 정확히 3개
         [SerializeField] private VirtualJoystick _joystick;
 
         private UpgradeData[] _currentPicks;
@@ -17,17 +14,23 @@ namespace ShooterGame.UI
         public void Show(UpgradeData[] picks)
         {
             _currentPicks = picks;
-            for (int i = 0; i < cardButtons.Length; i++)
+
+            for (int i = 0; i < _cards.Length; i++)
             {
-                int index = i;  // closure capture — must be local variable
-                nameTexts[i].text = picks[i].Name;
-                cardButtons[i].onClick.RemoveAllListeners();
-                cardButtons[i].onClick.AddListener(() => OnCardSelected(index));
+                int currentLevel = UpgradeManager.Instance != null
+                    ? UpgradeManager.Instance.GetAppliedCount(picks[i].Type)
+                    : 0;
+
+                _cards[i].Setup(picks[i], currentLevel);
+
+                int index = i;
+                _cards[i].Button.onClick.RemoveAllListeners();
+                _cards[i].Button.onClick.AddListener(() => OnCardSelected(index));
             }
+
             gameObject.SetActive(true);
             Time.timeScale = 0f;
 
-            // 터치 중이라도 조이스틱 상태 초기화 후 비활성화
             if (_joystick != null)
             {
                 _joystick.ResetInput();

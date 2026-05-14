@@ -8,59 +8,42 @@ namespace ShooterGame.UI
 {
     public class LobbyUpgradeSlot : MonoBehaviour
     {
-        [SerializeField] private Text   _nameText;
-        [SerializeField] private Text   _levelText;
-        [SerializeField] private Text   _costText;
-        [SerializeField] private Button _buyButton;
-        [SerializeField] private Text   _buyButtonText;
+        [SerializeField] private Image  _iconImage;
+        [SerializeField] private Button _selectButton;
 
         private LobbyUpgradeType       _type;
-        private readonly StringBuilder _sb = new StringBuilder(16);
-
         public void Initialize(LobbyUpgradeType type)
         {
             _type = type;
-            _buyButton.onClick.AddListener(OnBuyClicked);
+            _selectButton.onClick.AddListener(OnSelectClicked);
         }
 
-        public void Render(LobbyUpgradeData data, int currentLevel, int totalCoins)
+        public void Render(LobbyUpgradeData data, int currentLevel)
         {
-            _nameText.text  = data.DisplayName;
-            _levelText.text = BuildLevelDots(currentLevel, data.MaxLevel);
-
-            bool isMax = currentLevel >= data.MaxLevel;
-            if (isMax)
+            if (_iconImage != null)
             {
-                _costText.text          = "";
-                _buyButtonText.text     = "MAX";
-                _buyButton.interactable = false;
+                _iconImage.sprite  = data.Icon;
+                _iconImage.enabled = data.Icon != null;
             }
+  
+        }
+
+    
+
+        private void OnSelectClicked()
+        {
+            var popup = LobbyUpgradeInfoPopup.Instance;
+            if (popup == null) return;
+            if (popup.IsShowing && popup.CurrentType == _type)
+                popup.Hide();
             else
-            {
-                int cost                = data.GetCostForLevel(currentLevel);
-                _costText.text          = cost + " 코인";
-                _buyButtonText.text     = "구매";
-                _buyButton.interactable = totalCoins >= cost;
-            }
-        }
-
-        private string BuildLevelDots(int current, int max)
-        {
-            _sb.Clear();
-            for (int i = 0; i < max; i++)
-                _sb.Append(i < current ? "●" : "○");
-            return _sb.ToString();
-        }
-
-        private void OnBuyClicked()
-        {
-            LobbyUpgradeManager.Instance?.TryPurchase(_type);
+                popup.Show(_type);
         }
 
         private void OnDestroy()
         {
-            if (_buyButton != null)
-                _buyButton.onClick.RemoveListener(OnBuyClicked);
+            if (_selectButton != null)
+                _selectButton.onClick.RemoveListener(OnSelectClicked);
         }
     }
 }
