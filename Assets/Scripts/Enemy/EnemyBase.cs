@@ -47,8 +47,8 @@ namespace ShooterGame.Enemy
                 _renderer.sharedMaterial = _originalMaterial;
         }
 
-        public void Initialize(EnemyData data, float hpMultiplier, float speedMultiplier,
-                               Action<EnemyBase> releaseCallback)
+        public virtual void Initialize(EnemyData data, float hpMultiplier, float speedMultiplier,
+                                       Action<EnemyBase> releaseCallback)
         {
             _data            = data;
             _releaseCallback = releaseCallback;

@@ -1,4 +1,5 @@
 // Attach to: FinalBoss Enemy prefab root
+using System;
 using System.Collections;
 using UnityEngine;
 using ShooterGame.Core;
@@ -38,12 +39,12 @@ namespace ShooterGame.Enemy
         protected override void OnEnable()
         {
             base.OnEnable();
-            _reachedCenter = false;
-            _sweepTimer    = 0f;
-            _isPhase2      = false;
-            _maxHp         = 0;
-            _phase1Wait    = new WaitForSeconds(phase1FireInterval);
-            _phase2Wait    = new WaitForSeconds(phase2FireInterval);
+            _reachedCenter  = false;
+            _sweepTimer     = 0f;
+            _isPhase2       = false;
+            _shootCoroutine = null;
+            _phase1Wait     = new WaitForSeconds(phase1FireInterval);
+            _phase2Wait     = new WaitForSeconds(phase2FireInterval);
             if (_sr == null) _sr = GetComponent<SpriteRenderer>();
             if (_sr != null)  _sr.color = Color.white;
         }
@@ -57,9 +58,15 @@ namespace ShooterGame.Enemy
             }
         }
 
+        public override void Initialize(EnemyData data, float hpMultiplier, float speedMultiplier,
+                                        Action<EnemyBase> releaseCallback)
+        {
+            base.Initialize(data, hpMultiplier, speedMultiplier, releaseCallback);
+            _maxHp = CurrentHp;
+        }
+
         public override void TakeDamage(int dmg)
         {
-            if (_maxHp == 0) _maxHp = CurrentHp;   // set on first hit
             base.TakeDamage(dmg);
             if (!_isPhase2 && CurrentHp > 0) CheckPhaseTransition();
         }
@@ -87,11 +94,6 @@ namespace ShooterGame.Enemy
 
         private void CheckPhaseTransition()
         {
-            if (_maxHp == 0)
-            {
-                Debug.LogWarning("[FinalBossEnemy] MaxHp is 0 — check EnemyData_FinalBoss.BaseHp");
-                return;
-            }
             if (CurrentHp <= Mathf.RoundToInt(_maxHp * phase2HpThreshold))
                 EnterPhase2();
         }
