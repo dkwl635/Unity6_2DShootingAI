@@ -87,7 +87,11 @@ namespace ShooterGame.Enemy
 
         private void CheckPhaseTransition()
         {
-            if (_maxHp == 0) return;
+            if (_maxHp == 0)
+            {
+                Debug.LogWarning("[FinalBossEnemy] MaxHp is 0 — check EnemyData_FinalBoss.BaseHp");
+                return;
+            }
             if (CurrentHp <= Mathf.RoundToInt(_maxHp * phase2HpThreshold))
                 EnterPhase2();
         }
@@ -101,8 +105,6 @@ namespace ShooterGame.Enemy
 
             if (_shootCoroutine != null) StopCoroutine(_shootCoroutine);
             _shootCoroutine = StartCoroutine(ShootLoop());
-
-            AudioManager.Instance?.PlaySFX(SfxType.EnemyShoot);
         }
 
         private IEnumerator ShootLoop()
