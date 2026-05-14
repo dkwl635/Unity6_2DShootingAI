@@ -1,6 +1,7 @@
 // Attach to: LevelUpPanel GameObject (Canvas child, default inactive)
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using ShooterGame.Upgrade;
 
 namespace ShooterGame.UI
@@ -8,7 +9,7 @@ namespace ShooterGame.UI
     public class LevelUpPanel : MonoBehaviour
     {
         [SerializeField] private Button[]        cardButtons;  // exactly 3
-        [SerializeField] private Text[]          nameTexts;    // exactly 3, one per button
+        [SerializeField] private TMP_Text[]          nameTexts;    // exactly 3, one per button
         [SerializeField] private VirtualJoystick _joystick;
 
         private UpgradeData[] _currentPicks;

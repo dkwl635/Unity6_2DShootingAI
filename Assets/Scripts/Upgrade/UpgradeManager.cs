@@ -48,6 +48,8 @@ namespace ShooterGame.Upgrade
                 // 최대 체력이 이미 상한이면 해당 업그레이드를 후보에서 제외
                 if (d.Type == UpgradeType.MaxHp && playerStats != null && playerStats.MaxHp >= MAX_HP_CAP)
                     continue;
+                if (d.Type == UpgradeType.MissileCount && playerShooter != null && playerShooter.MissileStage >= 4)
+                    continue;
                 _eligible.Add(d);
             }
 
@@ -89,6 +91,9 @@ namespace ShooterGame.Upgrade
                     break;
                 case UpgradeType.Magnet:
                     MagnetEffect.Instance?.IncreaseRadius(data.Value);
+                    break;
+                case UpgradeType.MissileCount:
+                    playerShooter.IncreaseMissileStage();
                     break;
             }
             levelUpPanel.Hide();

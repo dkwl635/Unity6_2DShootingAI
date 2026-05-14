@@ -6,6 +6,7 @@ namespace ShooterGame.Upgrade
         AttackSpeed,
         Damage,
         MaxHp,
-        Magnet
+        Magnet,
+        MissileCount
     }
 }

@@ -72,7 +72,7 @@ namespace ShooterGame.Core
             if (Mathf.Abs(current - _lastAspect) > 0.001f)
             {
                 _lastAspect = current;
-                ApplyLetterbox();
+                //ApplyLetterbox();
             }
         }
 #endif

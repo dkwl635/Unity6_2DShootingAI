@@ -13,6 +13,7 @@ namespace ShooterGame.Core
         PlayerHit,
         GameOver,
         ButtonClick,
+        EnemyShoot,
     }
 
     public class AudioManager : MonoBehaviour
@@ -33,6 +34,7 @@ namespace ShooterGame.Core
         [SerializeField] private AudioClip _sfxPlayerHit;
         [SerializeField] private AudioClip _sfxGameOver;
         [SerializeField] private AudioClip _sfxButtonClick;
+        [SerializeField] private AudioClip _sfxEnemyShoot;
 
         [Header("SFX Pool")]
         [SerializeField] [Range(0f, 1f)] private float _sfxVolume   = 0.7f;
@@ -115,6 +117,7 @@ namespace ShooterGame.Core
             SfxType.PlayerHit    => _sfxPlayerHit,
             SfxType.GameOver     => _sfxGameOver,
             SfxType.ButtonClick  => _sfxButtonClick,
+            SfxType.EnemyShoot   => _sfxEnemyShoot,
             _                    => null
         };
 

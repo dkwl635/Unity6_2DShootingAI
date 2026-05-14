@@ -17,10 +17,12 @@ namespace ShooterGame.Player
         // Cached WaitForSeconds — never create 'new' inside coroutines
         private float _fireInterval;
         private float _fireTimer;
-        private int   _bulletDamage = 10;  // matches Bullet prefab's default damage
+        private int   _bulletDamage  = 10;
+        private int   _missileStage  = 0;   // 0~4
 
-        public float FireInterval => _fireInterval;
-        public int   BulletDamage => _bulletDamage;
+        public float FireInterval  => _fireInterval;
+        public int   BulletDamage  => _bulletDamage;
+        public int   MissileStage  => _missileStage;
 
         private void Awake()
         {
@@ -39,15 +41,46 @@ namespace ShooterGame.Player
 
         private void Fire()
         {
+            switch (_missileStage)
+            {
+                case 0:
+                    SpawnBullet(0f,     0f,   false);
+                    break;
+                case 1:
+                    SpawnBullet(-0.30f, 0f,   false);
+                    SpawnBullet( 0.30f, 0f,   false);
+                    break;
+                case 2:
+                    SpawnBullet(-0.50f, -15f, false);
+                    SpawnBullet( 0f,     0f,  false);
+                    SpawnBullet( 0.50f,  15f, false);
+                    break;
+                case 3:
+                    SpawnBullet(-0.50f, -15f, false);
+                    SpawnBullet( 0f,     0f,  true);   // 중앙만 유도
+                    SpawnBullet( 0.50f,  15f, false);
+                    break;
+                default: // 4+
+                    SpawnBullet(-0.40f,  -5f, true);
+                    SpawnBullet( 0f,      0f, true);
+                    SpawnBullet( 0.40f,   5f, true);
+                    break;
+            }
+            AudioManager.Instance?.PlaySFX(SfxType.PlayerShoot);
+        }
+
+        private void SpawnBullet(float xOffset, float zAngle, bool homing)
+        {
             Bullet bullet = BulletPool.Instance.Get();
             if (bullet == null) return;
 
-            bullet.transform.position = firePoint != null ? firePoint.position : transform.position;
-            bullet.transform.rotation = Quaternion.identity;
+            Vector3 pos = firePoint != null ? firePoint.position : transform.position;
+            pos.x += xOffset;
+            bullet.transform.position = pos;
+            bullet.transform.rotation = Quaternion.Euler(0f, 0f, zAngle);
             bullet.Initialize(BulletPool.Instance);
             bullet.SetDamage(_bulletDamage);
-
-            AudioManager.Instance?.PlaySFX(SfxType.PlayerShoot);
+            if (homing) bullet.SetHoming(true);
         }
 
         /// <summary>Call from UpgradeManager to modify attack speed.</summary>
@@ -78,6 +111,11 @@ namespace ShooterGame.Player
         {
             if (totalReduction <= 0f) return;
             IncreaseFireRate(totalReduction);
+        }
+
+        public void IncreaseMissileStage()
+        {
+            _missileStage = Mathf.Min(_missileStage + 1, 4);
         }
 
         private void OnDestroy()

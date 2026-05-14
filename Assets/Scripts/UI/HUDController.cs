@@ -24,7 +24,7 @@ namespace ShooterGame.UI
         [Header("Boss HP Bar")]
         [SerializeField] private GameObject _bossHpBox;
         [SerializeField] private Image      _bossHpFill;
-        [SerializeField] private TMP_Text   _bossHpText;
+
 
         [Header("References")]
         [SerializeField] private PlayerStats _playerStats;
@@ -112,12 +112,7 @@ namespace ShooterGame.UI
         {
             if (_bossHpFill != null)
                 _bossHpFill.fillAmount = max > 0 ? (float)current / max : 0f;
-            if (_bossHpText != null)
-            {
-                _sb.Clear();
-                _sb.Append(current).Append(" / ").Append(max);
-                _bossHpText.text = _sb.ToString();
-            }
+            
         }
 
         // ── Event Handlers ───────────────────────────────────────
