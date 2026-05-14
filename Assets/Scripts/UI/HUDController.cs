@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using ShooterGame.Core;
 using ShooterGame.Economy;
+using ShooterGame.Enemy;
 using ShooterGame.Player;
 
 namespace ShooterGame.UI
@@ -16,14 +17,21 @@ namespace ShooterGame.UI
         [SerializeField] private TMP_Text _coinText;
 
         [Header("Power Bar")]
+        [SerializeField] private GameObject _powerFillBox;
         [SerializeField] private Image _powerFill;
         [SerializeField] private TMP_Text _levelText;
+
+        [Header("Boss HP Bar")]
+        [SerializeField] private GameObject _bossHpBox;
+        [SerializeField] private Image      _bossHpFill;
+        [SerializeField] private TMP_Text   _bossHpText;
 
         [Header("References")]
         [SerializeField] private PlayerStats _playerStats;
 
         private readonly StringBuilder _sb = new StringBuilder(16);
-        private int _lastSeconds = -1;
+        private int             _lastSeconds = -1;
+        private FinalBossEnemy  _trackedBoss;
 
         private void Start()
         {
@@ -47,6 +55,14 @@ namespace ShooterGame.UI
                 OnPowerChanged(PowerSystem.Instance.CurrentPower, PowerSystem.Instance.PowerToNext);
                 OnLevelUp(PowerSystem.Instance.CurrentLevel);
             }
+
+            if (StageManager.Instance != null)
+            {
+                StageManager.Instance.OnFinalBossPhaseStart += OnBossPhaseStart;
+                StageManager.Instance.OnFinalBossPhaseEnd   += OnBossPhaseEnd;
+            }
+
+            _bossHpBox?.SetActive(false);
         }
 
         private void Update()
@@ -66,6 +82,42 @@ namespace ShooterGame.UI
             if (s < 10) _sb.Append('0');
             _sb.Append(s);
             _timerText.text = _sb.ToString();
+        }
+
+        // ── Boss HP Bar ──────────────────────────────────────────
+
+        private void OnBossPhaseStart()
+        {
+            _trackedBoss = FinalBossEnemy.ActiveBoss;
+            if (_trackedBoss != null)
+                _trackedBoss.OnHpChanged += UpdateBossHp;
+
+            _powerFillBox?.SetActive(false);
+            _bossHpBox?.SetActive(true);
+            UpdateBossHp(_trackedBoss?.Hp ?? 0, _trackedBoss?.MaxHp ?? 1);
+        }
+
+        private void OnBossPhaseEnd()
+        {
+            if (_trackedBoss != null)
+            {
+                _trackedBoss.OnHpChanged -= UpdateBossHp;
+                _trackedBoss = null;
+            }
+            _bossHpBox?.SetActive(false);
+            _powerFillBox?.SetActive(true);
+        }
+
+        private void UpdateBossHp(int current, int max)
+        {
+            if (_bossHpFill != null)
+                _bossHpFill.fillAmount = max > 0 ? (float)current / max : 0f;
+            if (_bossHpText != null)
+            {
+                _sb.Clear();
+                _sb.Append(current).Append(" / ").Append(max);
+                _bossHpText.text = _sb.ToString();
+            }
         }
 
         // ── Event Handlers ───────────────────────────────────────
@@ -103,12 +155,21 @@ namespace ShooterGame.UI
                 ScoreManager.Instance.OnScoreChanged -= OnScoreChanged;
             if (CoinSystem.Instance != null)
                 CoinSystem.Instance.OnCoinChanged -= OnCoinChanged;
-           
+
             if (PowerSystem.Instance != null)
             {
                 PowerSystem.Instance.OnPowerChanged -= OnPowerChanged;
                 PowerSystem.Instance.OnLevelUp      -= OnLevelUp;
             }
+
+            if (StageManager.Instance != null)
+            {
+                StageManager.Instance.OnFinalBossPhaseStart -= OnBossPhaseStart;
+                StageManager.Instance.OnFinalBossPhaseEnd   -= OnBossPhaseEnd;
+            }
+
+            if (_trackedBoss != null)
+                _trackedBoss.OnHpChanged -= UpdateBossHp;
         }
     }
 }

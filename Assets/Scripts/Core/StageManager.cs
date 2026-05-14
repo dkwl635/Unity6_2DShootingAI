@@ -12,8 +12,8 @@ namespace ShooterGame.Core
         public static StageManager Instance { get; private set; }
 
         [Header("Timing")]
-        [SerializeField] private float miniBossTime      = 120f;
-        [SerializeField] private float finalBossTime     = 240f;
+        [SerializeField] private float miniBossTime      = 10f;
+        [SerializeField] private float finalBossTime     = 20f;
         [SerializeField] private float stageClearSeconds = 3f;
 
         [Header("Prefabs")]
@@ -34,6 +34,8 @@ namespace ShooterGame.Core
         public bool IsInBossPhase { get; private set; }
 
         public event Action<int> OnStageComplete;
+        public event Action      OnFinalBossPhaseStart;
+        public event Action      OnFinalBossPhaseEnd;
 
         private float          _stageTimer;
         private int            _loopCount;
@@ -114,6 +116,7 @@ namespace ShooterGame.Core
             _activeFinalBoss                   = Instantiate(finalBossPrefab, transform);
             _activeFinalBoss.OnPatternComplete += OnFinalBossDone;
             _activeFinalBoss.StartPattern(finalBossConfig);
+            OnFinalBossPhaseStart?.Invoke();
         }
 
         // ── Pattern Callbacks ──────────────────────────────────────
@@ -145,6 +148,7 @@ namespace ShooterGame.Core
             yield return _stageClearWait;
 
             stageClearUI?.Hide();
+            OnFinalBossPhaseEnd?.Invoke();
 
             // Advance stage; wrap back to 1 after totalStages, count loops
             CurrentStage = (CurrentStage % totalStages) + 1;
@@ -183,6 +187,7 @@ namespace ShooterGame.Core
             }
 
             stageClearUI?.Hide();
+            if (IsInBossPhase) OnFinalBossPhaseEnd?.Invoke();
             IsInBossPhase = false;
         }
 

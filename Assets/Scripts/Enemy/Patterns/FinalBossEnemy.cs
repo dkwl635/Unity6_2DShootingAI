@@ -39,6 +39,7 @@ namespace ShooterGame.Enemy
         protected override void OnEnable()
         {
             base.OnEnable();
+            ActiveBoss      = this;
             _reachedCenter  = false;
             _sweepTimer     = 0f;
             _isPhase2       = false;
@@ -51,6 +52,7 @@ namespace ShooterGame.Enemy
 
         private void OnDisable()
         {
+            if (ActiveBoss == this) ActiveBoss = null;
             if (_shootCoroutine != null)
             {
                 StopCoroutine(_shootCoroutine);
@@ -58,16 +60,25 @@ namespace ShooterGame.Enemy
             }
         }
 
+        public static FinalBossEnemy ActiveBoss { get; private set; }
+
+        public int Hp    => CurrentHp;
+        public int MaxHp => _maxHp;
+
+        public event Action<int, int> OnHpChanged;  // (current, max)
+
         public override void Initialize(EnemyData data, float hpMultiplier, float speedMultiplier,
                                         Action<EnemyBase> releaseCallback)
         {
             base.Initialize(data, hpMultiplier, speedMultiplier, releaseCallback);
             _maxHp = CurrentHp;
+            OnHpChanged?.Invoke(CurrentHp, _maxHp);
         }
 
         public override void TakeDamage(int dmg)
         {
             base.TakeDamage(dmg);
+            OnHpChanged?.Invoke(Mathf.Max(0, CurrentHp), _maxHp);
             if (!_isPhase2 && CurrentHp > 0) CheckPhaseTransition();
         }
 
