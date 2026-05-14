@@ -15,12 +15,10 @@ namespace ShooterGame.Core
         [SerializeField] private ScreenSweepPattern  screenSweepPrefab;
         [SerializeField] private CircleTrapPattern   circleTrapPrefab;
         [SerializeField] private MeteorShowerPattern meteorShowerPrefab;
-        [SerializeField] private MiniBossPattern     miniBossPrefab;
-        [SerializeField] private PatternConfig       miniBossConfig;
 
-        private PatternBase            _activePattern;
-        private bool                   _running;
-        private float                  _patternTimer;
+        private PatternBase                 _activePattern;
+        private bool                        _running;
+        private float                       _patternTimer;
         private readonly List<PatternConfig> _eligible = new List<PatternConfig>();
 
         private void Awake()
@@ -43,11 +41,6 @@ namespace ShooterGame.Core
             {
                 Debug.LogWarning("[PatternManager] InGameManager not found in scene.");
             }
-
-            if (DifficultyManager.Instance != null)
-                DifficultyManager.Instance.OnMiniBossSpawn += SpawnMiniBoss;
-            else
-                Debug.LogWarning("[PatternManager] DifficultyManager not found in scene.");
         }
 
         private void Update()
@@ -61,6 +54,22 @@ namespace ShooterGame.Core
                 TrySpawnPattern();
             }
         }
+
+        // ── Public API for StageManager ──────────────────────────
+
+        public void PausePatterns()
+        {
+            _running = false;
+            _activePattern?.ForceComplete();
+        }
+
+        public void ResumePatterns()
+        {
+            _running      = true;
+            _patternTimer = 0f;
+        }
+
+        // ── Private ───────────────────────────────────────────────
 
         private void StartLoop()
         {
@@ -91,13 +100,6 @@ namespace ShooterGame.Core
             SpawnPattern(selected);
         }
 
-        private void SpawnMiniBoss()
-        {
-            if (miniBossConfig == null || miniBossPrefab == null) return;
-            _activePattern?.ForceComplete();
-            SpawnPattern(miniBossConfig, miniBossPrefab);
-        }
-
         private void SpawnPattern(PatternConfig config)
         {
             PatternBase prefab = GetPrefab(config.Kind);
@@ -107,8 +109,8 @@ namespace ShooterGame.Core
 
         private void SpawnPattern(PatternConfig config, PatternBase prefab)
         {
-            PatternBase pattern = Instantiate(prefab, transform);
-            _activePattern      = pattern;
+            PatternBase pattern    = Instantiate(prefab, transform);
+            _activePattern         = pattern;
             pattern.OnPatternComplete += OnPatternDone;
             pattern.StartPattern(config);
         }
@@ -120,12 +122,10 @@ namespace ShooterGame.Core
                 case PatternType.ScreenSweep:  return screenSweepPrefab;
                 case PatternType.CircleTrap:   return circleTrapPrefab;
                 case PatternType.MeteorShower: return meteorShowerPrefab;
-                case PatternType.MiniBoss:     return miniBossPrefab;
                 default:                       return null;
             }
         }
 
-        // Also called re-entrantly via StopLoop → ForceComplete → OnPatternComplete callback
         private void OnPatternDone()
         {
             if (_activePattern == null) return;
@@ -143,9 +143,6 @@ namespace ShooterGame.Core
                 InGameManager.Instance.OnGameStart -= StartLoop;
                 InGameManager.Instance.OnGameOver  -= StopLoop;
             }
-
-            if (DifficultyManager.Instance != null)
-                DifficultyManager.Instance.OnMiniBossSpawn -= SpawnMiniBoss;
 
             if (Instance == this) Instance = null;
         }
