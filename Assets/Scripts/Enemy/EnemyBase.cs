@@ -95,11 +95,16 @@ namespace ShooterGame.Enemy
 
         protected virtual void Die()
         {
+            TriggerDeathEffects();
+            ReturnToPool();
+        }
+
+        protected void TriggerDeathEffects()
+        {
             EffectManager.Instance?.Play(EffectType.Explosion, transform.position);
             AudioManager.Instance?.PlaySFX(SfxType.EnemyDeath);
             ScoreManager.Instance?.Add(_data.ScoreValue);
             OnEnemyDied?.Invoke(transform.position, _data.CoinDrop, _data.PowerDrop);
-            ReturnToPool();
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -113,7 +118,7 @@ namespace ShooterGame.Enemy
             }
         }
 
-        private void ReturnToPool()
+        protected void ReturnToPool()
         {
             if (_released) return;
             _released = true;
