@@ -92,6 +92,12 @@ namespace ShooterGame.Core
 
         private void StartFinalBossPhase()
         {
+            if (finalBossPrefab == null || finalBossConfig == null)
+            {
+                Debug.LogError("[StageManager] finalBossPrefab or finalBossConfig is null — aborting boss phase.");
+                return;
+            }
+
             IsInBossPhase = true;
 
             if (_activeMiniBoss != null)
@@ -105,9 +111,8 @@ namespace ShooterGame.Core
             PatternManager.Instance?.PausePatterns();
             EnemySpawner.Instance?.PauseSpawning();
 
-            if (finalBossPrefab == null || finalBossConfig == null) return;
-            _activeFinalBoss                    = Instantiate(finalBossPrefab, transform);
-            _activeFinalBoss.OnPatternComplete  += OnFinalBossDone;
+            _activeFinalBoss                   = Instantiate(finalBossPrefab, transform);
+            _activeFinalBoss.OnPatternComplete += OnFinalBossDone;
             _activeFinalBoss.StartPattern(finalBossConfig);
         }
 
@@ -178,11 +183,30 @@ namespace ShooterGame.Core
             }
 
             stageClearUI?.Hide();
+            IsInBossPhase = false;
         }
 
         private void OnGameStart()
         {
             StopAllCoroutines();
+
+            if (_activeMiniBoss != null)
+            {
+                _activeMiniBoss.OnPatternComplete -= OnMiniBossDone;
+                _activeMiniBoss.ForceComplete();
+                Destroy(_activeMiniBoss.gameObject);
+                _activeMiniBoss = null;
+            }
+
+            if (_activeFinalBoss != null)
+            {
+                _activeFinalBoss.OnPatternComplete -= OnFinalBossDone;
+                _activeFinalBoss.ForceComplete();
+                Destroy(_activeFinalBoss.gameObject);
+                _activeFinalBoss = null;
+            }
+
+            stageClearUI?.Hide();
             _stageTimer      = 0f;
             _loopCount       = 0;
             CurrentStage     = 1;
