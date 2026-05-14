@@ -43,6 +43,5 @@ namespace ShooterGame.Utils
         // ── Gameplay ─────────────────────────────────────────────
         public const int   TARGET_FRAME_RATE   = 60;
         public const float SCREEN_BOUND_MARGIN = 0.5f; // world-unit margin for player clamping
-        public const float BOSS_CENTER_Y       = 1f;   // center Y position for boss spawn
     }
 }
