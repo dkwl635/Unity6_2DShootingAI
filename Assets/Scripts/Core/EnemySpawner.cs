@@ -15,10 +15,13 @@ namespace ShooterGame.Core
         [SerializeField] private EnemyData enemyData;
         [SerializeField] private float     spawnOffsetY = 1f;
 
+        [SerializeField] private int guaranteedPowerEvery = 5;
+
         private ObjectPool<EnemyBase> _pool;
         private List<EnemyBase>       _activeEnemies = new List<EnemyBase>();
         private Coroutine             _spawnCoroutine;
         private bool                  _spawning;
+        private int                   _spawnCount;
 
         private void Awake()
         {
@@ -44,6 +47,7 @@ namespace ShooterGame.Core
         {
             if (_spawning) return;
             _spawning       = true;
+            _spawnCount     = 0;
             _spawnCoroutine = StartCoroutine(SpawnLoop());
         }
 
@@ -107,6 +111,11 @@ namespace ShooterGame.Core
             float speedMult = DifficultyManager.Instance?.EnemySpeedMultiplier ?? 1f;
 
             enemy.Initialize(enemyData, hpMult, speedMult, ReleaseEnemy);
+
+            _spawnCount++;
+            if (guaranteedPowerEvery > 0 && _spawnCount % guaranteedPowerEvery == 0)
+                enemy.SetGuaranteePower();
+
             _activeEnemies.Add(enemy);
         }
 

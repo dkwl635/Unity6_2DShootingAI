@@ -22,6 +22,7 @@ namespace ShooterGame.Enemy
         private float             _bottomBound;
         private bool              _released;
         private bool              _isFlashing;
+        private bool              _guaranteePower;
 
         private SpriteRenderer _renderer;
         private Material       _originalMaterial;
@@ -41,11 +42,14 @@ namespace ShooterGame.Enemy
 
         protected virtual void OnEnable()
         {
-            _released   = false;
-            _isFlashing = false;
+            _released       = false;
+            _isFlashing     = false;
+            _guaranteePower = false;
             if (_renderer != null && _originalMaterial != null)
                 _renderer.sharedMaterial = _originalMaterial;
         }
+
+        public void SetGuaranteePower() => _guaranteePower = true;
 
         public virtual void Initialize(EnemyData data, float hpMultiplier, float speedMultiplier,
                                        Action<EnemyBase> releaseCallback)
@@ -107,7 +111,7 @@ namespace ShooterGame.Enemy
 
             int   droppedCoin        = UnityEngine.Random.value < _data.CoinDropChance  ? _data.CoinDrop  : 0;
             int   droppedCoinCount   = droppedCoin  > 0 ? _data.CoinDropCount  : 0;
-            int   droppedPower       = UnityEngine.Random.value < _data.PowerDropChance ? _data.PowerDrop : 0;
+            int   droppedPower       = (_guaranteePower || UnityEngine.Random.value < _data.PowerDropChance) ? _data.PowerDrop : 0;
             int   droppedPowerCount  = droppedPower > 0 ? _data.PowerDropCount : 0;
             OnEnemyDied?.Invoke(transform.position,
                 droppedCoin,  droppedCoinCount,  _data.CoinDropRadius,
