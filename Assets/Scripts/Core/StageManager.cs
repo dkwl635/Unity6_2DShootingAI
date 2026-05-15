@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using ShooterGame.Economy;
 using ShooterGame.Enemy;
 using ShooterGame.UI;
 
@@ -12,9 +13,11 @@ namespace ShooterGame.Core
         public static StageManager Instance { get; private set; }
 
         [Header("Timing")]
-        [SerializeField] private float miniBossTime      = 10f;
-        [SerializeField] private float finalBossTime     = 20f;
-        [SerializeField] private float stageClearSeconds = 3f;
+        [SerializeField] private float miniBossTime  = 10f;
+        [SerializeField] private float finalBossTime = 20f;
+
+        [Header("Loop")]
+        [SerializeField] private int _stagesPerLoop = 3;
 
         [Header("Prefabs")]
         [SerializeField] private MiniBossPattern  miniBossPrefab;
@@ -25,10 +28,7 @@ namespace ShooterGame.Core
         [SerializeField] private PatternConfig finalBossConfig;
 
         [Header("UI")]
-        [SerializeField] private StageClearUI stageClearUI;
-
-        [Header("Stage")]
-        [SerializeField] private int totalStages = 2;
+        [SerializeField] private StageClearPanel _stageClearPanel;
 
         public int  CurrentStage  { get; private set; } = 1;
         public bool IsInBossPhase { get; private set; }
@@ -37,18 +37,15 @@ namespace ShooterGame.Core
         public event Action      OnFinalBossPhaseStart;
         public event Action      OnFinalBossPhaseEnd;
 
-        private float          _stageTimer;
-        private int            _loopCount;
-        private bool           _miniBossSpawned;
-        private PatternBase    _activeMiniBoss;
-        private PatternBase    _activeFinalBoss;
-        private WaitForSeconds _stageClearWait;
+        private float       _stageTimer;
+        private bool        _miniBossSpawned;
+        private PatternBase _activeMiniBoss;
+        private PatternBase _activeFinalBoss;
 
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance        = this;
-            _stageClearWait = new WaitForSeconds(stageClearSeconds);
+            Instance = this;
         }
 
         private void Start()
@@ -87,8 +84,8 @@ namespace ShooterGame.Core
         private void SpawnMiniBoss()
         {
             if (miniBossPrefab == null || miniBossConfig == null) return;
-            _activeMiniBoss                    = Instantiate(miniBossPrefab, transform);
-            _activeMiniBoss.OnPatternComplete  += OnMiniBossDone;
+            _activeMiniBoss                   = Instantiate(miniBossPrefab, transform);
+            _activeMiniBoss.OnPatternComplete += OnMiniBossDone;
             _activeMiniBoss.StartPattern(miniBossConfig);
         }
 
@@ -143,18 +140,30 @@ namespace ShooterGame.Core
         private IEnumerator StageTransition()
         {
             OnStageComplete?.Invoke(CurrentStage);
-            stageClearUI?.ShowStageClear(CurrentStage);
 
-            yield return _stageClearWait;
+            bool isLoopClear = (CurrentStage % _stagesPerLoop == 0);
 
-            stageClearUI?.Hide();
+            if (isLoopClear)
+            {
+                // Full loop clear — show panel (다시하기 = 씬 재로드, 나가기 = 로비)
+                if (_stageClearPanel != null)
+                {
+                    float elapsed = InGameManager.Instance != null ? InGameManager.Instance.ElapsedTime : 0f;
+                    int   coins   = CoinSystem.Instance    != null ? CoinSystem.Instance.Total          : 0;
+                    _stageClearPanel.Show(CurrentStage, elapsed, coins);
+                }
+
+                // 패널에서 버튼을 누르면 씬 전환이 일어나므로 여기서 대기할 필요 없음
+                yield break;
+            }
+            else
+            {
+                // Intermediate stage — advance immediately, no panel
+                CurrentStage++;
+            }
+
             OnFinalBossPhaseEnd?.Invoke();
-
-            // Advance stage; wrap back to 1 after totalStages, count loops
-            CurrentStage = (CurrentStage % totalStages) + 1;
-            if (CurrentStage == 1) _loopCount++;
-
-            DifficultyManager.Instance?.SetStage(CurrentStage, _loopCount);
+            DifficultyManager.Instance?.SetStage(CurrentStage);
 
             _stageTimer      = 0f;
             _miniBossSpawned = false;
@@ -186,7 +195,10 @@ namespace ShooterGame.Core
                 _activeFinalBoss = null;
             }
 
-            stageClearUI?.Hide();
+            if (_stageClearPanel != null)
+            {
+                _stageClearPanel.Hide();
+            }
             if (IsInBossPhase) OnFinalBossPhaseEnd?.Invoke();
             IsInBossPhase = false;
         }
@@ -211,14 +223,15 @@ namespace ShooterGame.Core
                 _activeFinalBoss = null;
             }
 
-            stageClearUI?.Hide();
-            _stageTimer      = 0f;
-            _loopCount       = 0;
-            CurrentStage     = 1;
+            if (_stageClearPanel != null)
+            {               
+                _stageClearPanel.Hide();
+            }
+            _stageTimer  = 0f;
+            CurrentStage = 1;
             _miniBossSpawned = false;
             IsInBossPhase    = false;
-            // Reset difficulty multiplier so new sessions always start from Stage 1 baseline
-            DifficultyManager.Instance?.SetStage(1, 0);
+            DifficultyManager.Instance?.SetStage(1);
         }
 
         private void OnDestroy()

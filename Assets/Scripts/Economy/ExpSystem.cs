@@ -15,9 +15,10 @@ namespace ShooterGame.Economy
 
         [SerializeField] private int basePowerPerLevel = 10;
 
-        public int CurrentPower { get; private set; }
-        public int CurrentLevel { get; private set; } = 1;
-        public int PowerToNext  => basePowerPerLevel * CurrentLevel;
+        public int   CurrentPower   { get; private set; }
+        public int   CurrentLevel   { get; private set; } = 1;
+        public int   PowerToNext    => basePowerPerLevel * CurrentLevel;
+        public float ExpMultiplier  { get; private set; } = 1f;
 
         private void Awake()
         {
@@ -34,7 +35,7 @@ namespace ShooterGame.Economy
         public void Add(int amount)
         {
             if (amount <= 0) return;
-            CurrentPower += amount;
+            CurrentPower += Mathf.RoundToInt(amount * ExpMultiplier);
             OnPowerChanged?.Invoke(CurrentPower, PowerToNext);
 
             while (CurrentPower >= PowerToNext)
@@ -46,10 +47,16 @@ namespace ShooterGame.Economy
             }
         }
 
+        public void IncreaseExpMultiplier(float bonus)
+        {
+            ExpMultiplier += bonus;
+        }
+
         private void ResetPower()
         {
-            CurrentPower = 0;
-            CurrentLevel = 1;
+            CurrentPower  = 0;
+            CurrentLevel  = 1;
+            ExpMultiplier = 1f;
             OnPowerChanged?.Invoke(CurrentPower, PowerToNext);
         }
 

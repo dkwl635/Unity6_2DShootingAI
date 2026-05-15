@@ -1,43 +1,44 @@
 // Attach to: Player GameObject
-
 using UnityEngine;
 using ShooterGame.UI;
 using ShooterGame.Utils;
 
 namespace ShooterGame.Player
 {
-    /// <summary>
-    /// Moves the player based on VirtualJoystick input.
-    /// Reads Direction and Magnitude from the joystick each frame,
-    /// applies speed scaling, and clamps to screen bounds.
-    /// </summary>
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField] private float maxMoveSpeed = 10f;
-
+        [SerializeField] private float          maxMoveSpeed = 10f;
         [SerializeField] private VirtualJoystick joystick;
 
-        // Cached camera — never access Camera.main in Update
-        private Camera _cam;
-
-        // Screen boundary in world units
-        private float _minX, _maxX, _minY, _maxY;
+        private Camera      _cam;
+        private PlayerStats _playerStats;
+        private float       _minX, _maxX, _minY, _maxY;
 
         private void Awake()
         {
-            _cam = Camera.main;
+            _cam         = Camera.main;
+            _playerStats = GetComponent<PlayerStats>();
         }
 
         private void Start()
         {
             CalculateBounds();
+            if (_playerStats != null)
+                _playerStats.OnDied += Respawn;
         }
 
         private void Update()
         {
             if (joystick == null || !joystick.IsPressed) return;
-
             ApplyMovement(joystick.Direction, joystick.Magnitude);
+        }
+
+        // ── Respawn ───────────────────────────────────────────────
+
+        private void Respawn()
+        {
+            if (_playerStats.Lives <= 0) return;
+            transform.position = new Vector3(0f, _minY, 0f);
         }
 
         // ── Movement ──────────────────────────────────────────────
@@ -56,8 +57,6 @@ namespace ShooterGame.Player
         }
 
         // ── Bounds ────────────────────────────────────────────────
-        // Fixed world-unit play area derived from Constants.
-        // Same on every device — does NOT depend on camera or screen size.
 
         private void CalculateBounds()
         {
@@ -67,6 +66,12 @@ namespace ShooterGame.Player
             _maxX =  Constants.PLAY_HALF_WIDTH  - margin;
             _minY = -Constants.PLAY_HALF_HEIGHT + margin;
             _maxY =  Constants.PLAY_HALF_HEIGHT - margin;
+        }
+
+        private void OnDestroy()
+        {
+            if (_playerStats != null)
+                _playerStats.OnDied -= Respawn;
         }
     }
 }

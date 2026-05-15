@@ -17,4 +17,8 @@ MonoBehaviour:
   scoreValue: 10
   contactDamage: 1
   coinDrop: 1
-  expDrop: 5
+  coinDropCount: 1
+  coinDropChance: 1
+  coinDropRadius: 1
+  powerDrop: 5
+  powerDropChance: 0.4

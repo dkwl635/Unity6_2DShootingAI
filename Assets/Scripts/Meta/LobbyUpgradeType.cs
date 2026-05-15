@@ -3,9 +3,10 @@ namespace ShooterGame.Meta
 {
     public enum LobbyUpgradeType
     {
-        MaxHp        = 0,
+        MaxLives     = 0,
         Damage       = 1,
         AttackSpeed  = 2,
-        MagnetRange  = 3
+        MagnetRange  = 3,
+        None         = 4,
     }
 }

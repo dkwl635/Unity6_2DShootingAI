@@ -1,4 +1,5 @@
 // Attach to: TitlePanel GameObject (Canvas child, Lobby scene)
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,24 +7,24 @@ namespace ShooterGame.UI
 {
     public class TitlePanel : MonoBehaviour
     {
-        [SerializeField] private GameObject _lobbyPanel;
-        [SerializeField] private Button     _anywhereButton;  // 화면 전체를 덮는 투명 버튼
+        [SerializeField] private Button _anywhereButton;
+
+        public event Action OnTitleTouched;
 
         private void Start()
         {
-            _anywhereButton.onClick.AddListener(OnTouched);
+            _anywhereButton.onClick.AddListener(HandleButtonClick);
         }
 
-        private void OnTouched()
+        private void HandleButtonClick()
         {
-            _lobbyPanel?.SetActive(true);
-            gameObject.SetActive(false);
+            OnTitleTouched?.Invoke();
         }
 
         private void OnDestroy()
         {
             if (_anywhereButton != null)
-                _anywhereButton.onClick.RemoveListener(OnTouched);
+                _anywhereButton.onClick.RemoveListener(HandleButtonClick);
         }
     }
 }

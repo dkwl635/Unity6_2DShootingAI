@@ -27,7 +27,7 @@ namespace ShooterGame.Player
         private void Start()
         {
             if (_playerStats != null)
-                _playerStats.OnHit += HandleHit;
+                _playerStats.OnDied += HandleHit;
         }
 
         private void HandleHit()
@@ -59,7 +59,7 @@ namespace ShooterGame.Player
         private void OnDestroy()
         {
             if (_playerStats != null)
-                _playerStats.OnHit -= HandleHit;
+                _playerStats.OnDied -= HandleHit;
         }
     }
 }

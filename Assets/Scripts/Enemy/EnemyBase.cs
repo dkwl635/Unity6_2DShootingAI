@@ -28,7 +28,7 @@ namespace ShooterGame.Enemy
         private WaitForSeconds _flashWait;
 
         // Static event — DropManager subscribes without a direct reference to EnemyBase instances
-        public static event Action<Vector3, int, int> OnEnemyDied;
+        public static event Action<Vector3, int, int, float, int, int, float> OnEnemyDied; // pos, coinValue, coinCount, coinRadius, powerValue, powerCount, powerRadius
 
         private void Awake()
         {
@@ -104,7 +104,14 @@ namespace ShooterGame.Enemy
             EffectManager.Instance?.Play(EffectType.Explosion, transform.position);
             AudioManager.Instance?.PlaySFX(SfxType.EnemyDeath);
             ScoreManager.Instance?.Add(_data.ScoreValue);
-            OnEnemyDied?.Invoke(transform.position, _data.CoinDrop, _data.PowerDrop);
+
+            int   droppedCoin        = UnityEngine.Random.value < _data.CoinDropChance  ? _data.CoinDrop  : 0;
+            int   droppedCoinCount   = droppedCoin  > 0 ? _data.CoinDropCount  : 0;
+            int   droppedPower       = UnityEngine.Random.value < _data.PowerDropChance ? _data.PowerDrop : 0;
+            int   droppedPowerCount  = droppedPower > 0 ? _data.PowerDropCount : 0;
+            OnEnemyDied?.Invoke(transform.position,
+                droppedCoin,  droppedCoinCount,  _data.CoinDropRadius,
+                droppedPower, droppedPowerCount, _data.PowerDropRadius);
         }
 
         private void OnTriggerEnter2D(Collider2D other)

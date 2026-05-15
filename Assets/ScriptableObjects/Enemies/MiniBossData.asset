@@ -12,7 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77431f7a2332d2f47992b57a4454a333, type: 3}
   m_Name: MiniBossData
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Enemy.EnemyData
-  baseHp: 120
+  baseHp: 200
   moveSpeed: 2.5
   scoreValue: 100
   contactDamage: 5
+  coinDrop: 1
+  coinDropCount: 5
+  coinDropChance: 1
+  coinDropRadius: 3
+  powerDrop: 5
+  powerDropCount: 1
+  powerDropChance: 1
+  powerDropRadius: 0.3

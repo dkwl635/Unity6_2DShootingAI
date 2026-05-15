@@ -29,26 +29,30 @@ namespace ShooterGame.Economy
         private void OnEnable()  => EnemyBase.OnEnemyDied += HandleEnemyDied;
         private void OnDisable() => EnemyBase.OnEnemyDied -= HandleEnemyDied;
 
-        private void HandleEnemyDied(Vector3 pos, int coin, int power)
+        private void HandleEnemyDied(Vector3 pos, int coin, int coinCount, float coinRadius, int power, int powerCount, float powerRadius)
         {
-            if (coin  > 0) SpawnCoin(pos, coin);
-            if (power > 0) SpawnPower(pos, power);
+            if (coin > 0)
+                for (int i = 0; i < coinCount; i++)
+                    SpawnCoin(pos, coin, coinRadius);
+            if (power > 0)
+                for (int i = 0; i < powerCount; i++)
+                    SpawnPower(pos, power, powerRadius);
         }
 
-        private void SpawnCoin(Vector3 pos, int value)
+        private void SpawnCoin(Vector3 pos, int value, float radius = 0.3f)
         {
             if (_coinPool == null) return;
             CoinDrop drop = _coinPool.Get();
             drop.SetValue(value);
-            drop.Initialize(pos + RandomOffset(), () => _coinPool.Release(drop));
+            drop.Initialize(pos + RandomOffset(radius), () => _coinPool.Release(drop));
         }
 
-        private void SpawnPower(Vector3 pos, int value)
+        private void SpawnPower(Vector3 pos, int value, float radius = 0.3f)
         {
             if (_powerPool == null) return;
             PowerDrop drop = _powerPool.Get();
             drop.SetValue(value);
-            drop.Initialize(pos + RandomOffset(), () => _powerPool.Release(drop));
+            drop.Initialize(pos + RandomOffset(radius), () => _powerPool.Release(drop));
         }
 
 

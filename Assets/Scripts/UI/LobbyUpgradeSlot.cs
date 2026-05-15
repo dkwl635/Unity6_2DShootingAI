@@ -3,6 +3,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using ShooterGame.Meta;
+using System;
+using Unity.VisualScripting;
 
 namespace ShooterGame.UI
 {
@@ -11,11 +13,14 @@ namespace ShooterGame.UI
         [SerializeField] private Image  _iconImage;
         [SerializeField] private Button _selectButton;
 
+        public event Action<LobbyUpgradeType> OnButtonClicked;
+
         private LobbyUpgradeType       _type;
         public void Initialize(LobbyUpgradeType type)
         {
             _type = type;
             _selectButton.onClick.AddListener(OnSelectClicked);
+            OnButtonClicked = null;
         }
 
         public void Render(LobbyUpgradeData data, int currentLevel)
@@ -32,18 +37,16 @@ namespace ShooterGame.UI
 
         private void OnSelectClicked()
         {
-            var popup = LobbyUpgradeInfoPopup.Instance;
-            if (popup == null) return;
-            if (popup.IsShowing && popup.CurrentType == _type)
-                popup.Hide();
-            else
-                popup.Show(_type);
+            OnButtonClicked?.Invoke(_type);
+       
         }
 
         private void OnDestroy()
         {
             if (_selectButton != null)
                 _selectButton.onClick.RemoveListener(OnSelectClicked);
+
+            OnButtonClicked = null;
         }
     }
 }

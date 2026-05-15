@@ -84,8 +84,8 @@ namespace ShooterGame.Upgrade
                 case UpgradeType.Damage:
                     playerShooter.IncreaseDamage((int)data.Value);
                     break;
-                case UpgradeType.MaxHp:
-                    playerStats?.IncreaseMaxHp((int)data.Value);
+                case UpgradeType.ExpBoost:
+                    PowerSystem.Instance?.IncreaseExpMultiplier(data.Value);
                     break;
                 case UpgradeType.Magnet:
                     MagnetEffect.Instance?.IncreaseRadius(data.Value);

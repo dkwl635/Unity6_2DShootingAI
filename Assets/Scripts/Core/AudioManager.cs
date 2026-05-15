@@ -1,5 +1,6 @@
 // Attach to: AudioManager GameObject (DontDestroyOnLoad)
 using UnityEngine;
+using ShooterGame.Utils;
 
 namespace ShooterGame.Core
 {
@@ -44,11 +45,17 @@ namespace ShooterGame.Core
         private AudioSource[] _sfxPool;
         private int           _sfxIndex;
 
+        public float BgmVolume => _bgmVolume;
+        public float SfxVolume => _sfxVolume;
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            _bgmVolume = PlayerPrefs.GetFloat(Constants.PREF_BGM_VOLUME, _bgmVolume);
+            _sfxVolume = PlayerPrefs.GetFloat(Constants.PREF_SFX_VOLUME, _sfxVolume);
 
             BuildBgmSource();
             BuildSfxPool();
@@ -68,11 +75,13 @@ namespace ShooterGame.Core
         {
             _bgmVolume = Mathf.Clamp01(volume);
             _bgmSource.volume = _bgmVolume;
+            PlayerPrefs.SetFloat(Constants.PREF_BGM_VOLUME, _bgmVolume);
         }
 
         public void SetSfxVolume(float volume)
         {
             _sfxVolume = Mathf.Clamp01(volume);
+            PlayerPrefs.SetFloat(Constants.PREF_SFX_VOLUME, _sfxVolume);
         }
 
         // ── SFX ─────────────────────────────────────────────────────

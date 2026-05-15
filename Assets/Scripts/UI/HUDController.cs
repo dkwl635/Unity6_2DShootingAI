@@ -26,6 +26,10 @@ namespace ShooterGame.UI
         [SerializeField] private Image      _bossHpFill;
 
 
+        [Header("Pause")]
+        [SerializeField] private Button     _pauseButton;
+        [SerializeField] private PausePanel _pausePanel;
+
         [Header("References")]
         [SerializeField] private PlayerStats _playerStats;
 
@@ -35,6 +39,9 @@ namespace ShooterGame.UI
 
         private void Start()
         {
+            if (_pauseButton != null)
+                _pauseButton.onClick.AddListener(OnPauseClicked);
+
             if (ScoreManager.Instance != null)
             {
                 ScoreManager.Instance.OnScoreChanged += OnScoreChanged;
@@ -144,8 +151,16 @@ namespace ShooterGame.UI
             _levelText.text = _sb.ToString();
         }
 
+        private void OnPauseClicked()
+        {
+            _pausePanel?.Show();
+        }
+
         private void OnDestroy()
         {
+            if (_pauseButton != null)
+                _pauseButton.onClick.RemoveListener(OnPauseClicked);
+
             if (ScoreManager.Instance != null)
                 ScoreManager.Instance.OnScoreChanged -= OnScoreChanged;
             if (CoinSystem.Instance != null)

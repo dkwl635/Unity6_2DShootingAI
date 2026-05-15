@@ -8,9 +8,7 @@ using ShooterGame.Meta;
 namespace ShooterGame.UI
 {
     public class LobbyUpgradeInfoPopup : MonoBehaviour
-    {
-        public static LobbyUpgradeInfoPopup Instance { get; private set; }
-
+    {    
         [Header("Info")]
         [SerializeField] private Image _iconImage;
         [SerializeField] private TMP_Text  _nameText;
@@ -32,8 +30,7 @@ namespace ShooterGame.UI
 
         private void Awake()
         {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
+            _currentType = LobbyUpgradeType.None;
             gameObject.SetActive(false);
             _upgradeButton.onClick.AddListener(OnUpgradeClicked);
         }
@@ -142,7 +139,7 @@ namespace ShooterGame.UI
         {
             if (_upgradeButton != null)
                 _upgradeButton.onClick.RemoveListener(OnUpgradeClicked);
-            if (Instance == this) Instance = null;
+            
         }
     }
 }

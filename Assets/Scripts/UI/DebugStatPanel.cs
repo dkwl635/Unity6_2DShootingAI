@@ -12,7 +12,7 @@ namespace ShooterGame.UI
     {
         [SerializeField] private Text levelText;
         [SerializeField] private Text powerText;
-        [SerializeField] private Text hpText;
+       
         [SerializeField] private Text upgradeText;
 
         [SerializeField] private PlayerStats   playerStats;
@@ -49,9 +49,7 @@ namespace ShooterGame.UI
                 powerText.text = $"POWER  {PowerSystem.Instance.CurrentPower} / {PowerSystem.Instance.PowerToNext}";
             }
 
-            // HP
-            if (playerStats != null)
-                hpText.text = $"HP  {playerStats.CurrentHp} / {playerStats.MaxHp}";
+        
 
             // Upgrade stats
             _sb.Clear();

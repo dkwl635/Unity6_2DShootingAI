@@ -44,6 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03e1216e128d67346b4e8293f34ae0e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Core.CircleTrapPattern
-  spawnRadius: 4
-  closeSpeed: 2
-  releaseRadius: 0.5
+  spawnHalfWidth: 4
+  targetY: 6.5
+  descentSpeed: 6.5
+  waitDuration: 1
+  fireInterval: 0.5
+  flySpeed: 6

@@ -8,88 +8,87 @@ namespace ShooterGame.Player
 {
     public class PlayerStats : MonoBehaviour
     {
-        [SerializeField] private int   maxHp              = 3;
-        [SerializeField] private float invincibleDuration = 1.5f;
+        [SerializeField] private int   maxLives                 = 3;
+        [SerializeField] private float respawnInvincibleDuration = 2f;
 
-        public event Action<int, int> OnHpChanged; // (currentHp, maxHp)
-        public event Action           OnHit;       // fires whenever damage is actually taken
+        public event Action<int, int> OnLivesChanged; // (currentLives, maxLives)
+        public event Action           OnDied;          // fires whenever a life is lost
 
-        public int  CurrentHp    { get; private set; }
-        public int  MaxHp        { get; private set; }
-        public int  BaseMaxHp    { get; private set; }  // 로비 보너스 적용 후 기준값
+        public int  Lives        { get; private set; }
+        public int  MaxLives     { get; private set; }
+        public int  BaseMaxLives { get; private set; }
         public bool IsInvincible { get; private set; }
 
-        private WaitForSeconds _invincibleWait;
+        private WaitForSeconds _respawnWait;
 
         private void Awake()
         {
-            MaxHp     = maxHp;
-            BaseMaxHp = maxHp;
-            CurrentHp = maxHp;
-            _invincibleWait = new WaitForSeconds(invincibleDuration);
+            MaxLives     = maxLives;
+            BaseMaxLives = maxLives;
+            Lives        = maxLives;
+            _respawnWait = new WaitForSeconds(respawnInvincibleDuration);
         }
 
         private void Start()
         {
             if (InGameManager.Instance != null)
-                InGameManager.Instance.OnGameStart += ResetHp;
+                InGameManager.Instance.OnGameStart += ResetLives;
         }
 
         public void TakeDamage(int dmg)
         {
             if (IsInvincible || dmg <= 0) return;
 
-            CurrentHp = Mathf.Max(0, CurrentHp - dmg);
-            OnHpChanged?.Invoke(CurrentHp, maxHp);
-            OnHit?.Invoke();
+            Lives = Mathf.Max(0, Lives - 1);
+            OnLivesChanged?.Invoke(Lives, MaxLives);
+            OnDied?.Invoke();
             CameraShake.Instance?.ShakeHit();
             AudioManager.Instance?.PlaySFX(SfxType.PlayerHit);
 
-            if (CurrentHp <= 0)
+            if (Lives <= 0)
             {
                 AudioManager.Instance?.PlaySFX(SfxType.GameOver);
                 InGameManager.Instance?.TriggerGameOver();
                 return;
             }
 
-            StartCoroutine(InvincibilityRoutine());
+            StartCoroutine(RespawnInvincibilityRoutine());
         }
 
-        private IEnumerator InvincibilityRoutine()
+        private IEnumerator RespawnInvincibilityRoutine()
         {
             IsInvincible = true;
-            yield return _invincibleWait;
+            yield return _respawnWait;
             IsInvincible = false;
         }
 
-        public void IncreaseMaxHp(int amount)
+        public void IncreaseMaxLives(int amount)
         {
-            maxHp     += amount;
-            MaxHp      = maxHp;
-            CurrentHp  = Mathf.Min(CurrentHp + amount, maxHp);
-            OnHpChanged?.Invoke(CurrentHp, maxHp);
+            maxLives  += amount;
+            MaxLives   = maxLives;
+            Lives      = Mathf.Min(Lives + amount, maxLives);
+            OnLivesChanged?.Invoke(Lives, MaxLives);
         }
 
-        /// <summary>게임 시작 시 InGameManager가 한 번 호출. totalGain = gainPerLevel * level.</summary>
-        public void ApplyPermanentHpBonus(int totalGain)
+        public void ApplyPermanentLivesBonus(int totalGain)
         {
             if (totalGain <= 0) return;
-            IncreaseMaxHp(totalGain);
-            BaseMaxHp = MaxHp;  // 로비 보너스 반영 후 기준 고정
+            IncreaseMaxLives(totalGain);
+            BaseMaxLives = MaxLives;
         }
 
-        private void ResetHp()
+        private void ResetLives()
         {
-            MaxHp        = maxHp;
-            CurrentHp    = maxHp;
+            MaxLives     = maxLives;
+            Lives        = maxLives;
             IsInvincible = false;
-            OnHpChanged?.Invoke(CurrentHp, maxHp);
+            OnLivesChanged?.Invoke(Lives, MaxLives);
         }
 
         private void OnDestroy()
         {
             if (InGameManager.Instance != null)
-                InGameManager.Instance.OnGameStart -= ResetHp;
+                InGameManager.Instance.OnGameStart -= ResetLives;
         }
     }
 }

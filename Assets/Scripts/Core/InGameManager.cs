@@ -82,14 +82,14 @@ namespace ShooterGame.Core
         {
             if (SaveManager.Instance == null || _lobbyUpgrades == null) return;
 
-            int hpLevel     = SaveManager.Instance.GetUpgradeLevel(LobbyUpgradeType.MaxHp);
+            int livesLevel  = SaveManager.Instance.GetUpgradeLevel(LobbyUpgradeType.MaxLives);
             int dmgLevel    = SaveManager.Instance.GetUpgradeLevel(LobbyUpgradeType.Damage);
             int atkLevel    = SaveManager.Instance.GetUpgradeLevel(LobbyUpgradeType.AttackSpeed);
             int magnetLevel = SaveManager.Instance.GetUpgradeLevel(LobbyUpgradeType.MagnetRange);
 
-            if (hpLevel > 0 && _playerStats != null)
-                _playerStats.ApplyPermanentHpBonus(
-                    Mathf.RoundToInt(_lobbyUpgrades[(int)LobbyUpgradeType.MaxHp].GetTotalGain(hpLevel)));
+            if (livesLevel > 0 && _playerStats != null)
+                _playerStats.ApplyPermanentLivesBonus(
+                    Mathf.RoundToInt(_lobbyUpgrades[(int)LobbyUpgradeType.MaxLives].GetTotalGain(livesLevel)));
 
             if (dmgLevel > 0 && _playerShooter != null)
                 _playerShooter.ApplyPermanentDamageBonus(

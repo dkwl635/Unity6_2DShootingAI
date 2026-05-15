@@ -5,7 +5,7 @@ namespace ShooterGame.Upgrade
     {
         AttackSpeed,
         Damage,
-        MaxHp,
+        ExpBoost,
         Magnet,
         MissileCount
     }

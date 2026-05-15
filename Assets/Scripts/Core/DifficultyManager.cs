@@ -44,9 +44,9 @@ namespace ShooterGame.Core
             EnemyHpMultiplier    = Mathf.Clamp(1f + _stageBaseMultiplier + hpGain * t,    1f, maxHpMult);
         }
 
-        // Called by StageManager on each stage transition
-        // Stage 2 → +0.3 base; each additional full loop → +0.2 on top
-        public void SetStage(int stage, int loopCount)
+        // Called by StageManager on each stage/loop transition
+        // Each stage in a loop adds 0.3; each completed loop adds 0.2 on top
+        public void SetStage(int stage, int loopCount = 0)
         {
             _stageBaseMultiplier = (stage - 1) * 0.3f + loopCount * 0.2f;
         }
