@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CircleTrapConfig
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Enemy.PatternConfig
   patternType: 1
-  enemyPrefab: {fileID: 7674852228300360886, guid: 1b0a8c0dd40852f409e8515f43e39e66, type: 3}
+  enemyPrefab: {fileID: 2178701509036165793, guid: 21c4b8b9b1a979c43b67b6b7b958fd24, type: 3}
   enemyData: {fileID: 11400000, guid: 5db9f1ab4b5c23f42aadf782b074bdd2, type: 2}
   enemyCount: 5
   unlockTime: 30

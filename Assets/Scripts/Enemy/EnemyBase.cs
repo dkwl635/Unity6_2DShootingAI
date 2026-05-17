@@ -26,7 +26,7 @@ namespace ShooterGame.Enemy
 
         private SpriteRenderer _renderer;
         private Material       _originalMaterial;
-        private WaitForSeconds _flashWait;
+        private float          _flashTimer;
 
         // Static event — DropManager subscribes without a direct reference to EnemyBase instances
         public static event Action<Vector3, int, int, float, int, int, float> OnEnemyDied; // pos, coinValue, coinCount, coinRadius, powerValue, powerCount, powerRadius
@@ -35,7 +35,6 @@ namespace ShooterGame.Enemy
         {
             _bottomBound = -(Constants.PLAY_HALF_HEIGHT + 1f);
             _renderer    = GetComponent<SpriteRenderer>();
-            _flashWait   = new WaitForSeconds(flashDuration);
             if (_renderer != null)
                 _originalMaterial = _renderer.sharedMaterial;
         }
@@ -62,6 +61,16 @@ namespace ShooterGame.Enemy
 
         protected virtual void Update()
         {
+            if (_isFlashing)
+            {
+                _flashTimer -= Time.deltaTime;
+                if (_flashTimer <= 0f)
+                {
+                    _isFlashing = false;
+                    if (_renderer != null && _originalMaterial != null)
+                        _renderer.sharedMaterial = _originalMaterial;
+                }
+            }
             Move();
             if (transform.position.y < _bottomBound)
                 ReturnToPool();

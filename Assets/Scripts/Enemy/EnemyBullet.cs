@@ -28,7 +28,8 @@ namespace ShooterGame.Enemy
         private void Update()
         {
             transform.Translate(Vector3.up * moveSpeed * Time.deltaTime);
-            if (transform.position.y < _bottomBound)
+            Vector3 pos = transform.position;
+            if (pos.y < _bottomBound || Mathf.Abs(pos.x) > Constants.PLAY_HALF_WIDTH + 3f)
                 ReturnToPool();
         }
 

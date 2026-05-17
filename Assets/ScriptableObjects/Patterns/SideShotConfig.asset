@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a77821a2d5e06c488a9250d0613229f, type: 3}
-  m_Name: ScreenSweepConfig
+  m_Name: SideShotConfig
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Enemy.PatternConfig
-  patternType: 0
-  enemyPrefab: {fileID: 2178701509036165793, guid: 21c4b8b9b1a979c43b67b6b7b958fd24, type: 3}
+  patternType: 4
+  enemyPrefab: {fileID: 7674852228300360886, guid: 1b0a8c0dd40852f409e8515f43e39e66, type: 3}
   enemyData: {fileID: 11400000, guid: 5db9f1ab4b5c23f42aadf782b074bdd2, type: 2}
-  enemyCount: 5
+  enemyCount: 3
   unlockTime: 0
-  patternDuration: 10
+  patternDuration: 8

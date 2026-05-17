@@ -13,7 +13,17 @@
       "mcp__unityMCP__manage_gameobject",
       "mcp__unityMCP__find_gameobjects",
       "mcp__unityMCP__manage_prefabs",
-      "mcp__unityMCP__manage_editor"
+      "mcp__unityMCP__manage_editor",
+      "mcp__unityMCP__validate_script",
+      "Skill(unity-mcp-skill)",
+      "mcp__unityMCP__create_script",
+      "mcp__claude_ai_Notion__notion-search",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "mcp__unityMCP__manage_scriptable_object",
+      "mcp__unityMCP__manage_asset",
+      "mcp__unityMCP__refresh_unity",
+      "mcp__unityMCP__manage_script",
+      "mcp__unityMCP__manage_camera"
     ]
   },
   "enabledMcpjsonServers": [

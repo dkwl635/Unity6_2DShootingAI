@@ -15,6 +15,7 @@ namespace ShooterGame.Core
         [SerializeField] private ScreenSweepPattern  screenSweepPrefab;
         [SerializeField] private CircleTrapPattern   circleTrapPrefab;
         [SerializeField] private MeteorShowerPattern meteorShowerPrefab;
+        [SerializeField] private SideShotPattern     sideShotPrefab;
 
         private PatternBase                 _activePattern;
         private bool                        _running;
@@ -122,6 +123,7 @@ namespace ShooterGame.Core
                 case PatternType.ScreenSweep:  return screenSweepPrefab;
                 case PatternType.CircleTrap:   return circleTrapPrefab;
                 case PatternType.MeteorShower: return meteorShowerPrefab;
+                case PatternType.SideShot:     return sideShotPrefab;
                 default:                       return null;
             }
         }

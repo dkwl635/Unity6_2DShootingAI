@@ -18,7 +18,7 @@ Allow players to spend coins earned in-game to purchase permanent stat upgrades 
 | `MaxHp` | 최대 체력 | +1 HP | 100 | ×2 |
 | `Damage` | 공격력 | +2 damage | 100 | ×2 |
 | `AttackSpeed` | 공격 속도 | -0.03s fire interval | 150 | ×2 |
-| `MagnetRange` | 마그넷 범위 | +0.5 radius | 100 | ×2 |
+| `MagnetRange` | 마그넷 범위 | +0.5 radius | 100 | ×2 |  
 
 - Max level: **5** per upgrade
 - Cost formula: `baseCost × costMultiplier^(level - 1)`

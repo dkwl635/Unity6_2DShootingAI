@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShooterGame.Enemy
 {
-    public enum PatternType { ScreenSweep, CircleTrap, MeteorShower, MiniBoss }
+    public enum PatternType { ScreenSweep, CircleTrap, MeteorShower, MiniBoss, SideShot }
 
     [CreateAssetMenu(fileName = "PatternConfig", menuName = "ShooterGame/Pattern Config")]
     public class PatternConfig : ScriptableObject
