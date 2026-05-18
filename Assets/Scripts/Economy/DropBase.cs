@@ -21,6 +21,7 @@ namespace ShooterGame.Economy
         private float     _attractSpeed;
         private float     _spawnTime;
 
+     
         private void Awake()
         {
             _bottomBound = -(Constants.PLAY_HALF_HEIGHT + 1f);
@@ -31,6 +32,7 @@ namespace ShooterGame.Economy
             _released      = false;
             _attractTarget = null;
             _spawnTime     = Time.time;
+      
         }
 
         public void Initialize(Vector3 position, Action onRelease)
@@ -80,7 +82,7 @@ namespace ShooterGame.Economy
         {
             if (_released) return;
             _released      = true;
-            _attractTarget = null;
+            _attractTarget = null;         
             _onRelease?.Invoke();
             _onRelease = null;
         }

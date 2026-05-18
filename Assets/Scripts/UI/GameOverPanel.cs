@@ -3,8 +3,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using ShooterGame.Core;
-using UnityEditor.Hardware;
-using UnityEditor.SceneManagement;
 using TMPro;
 using System.Text;
 using ShooterGame.Economy;

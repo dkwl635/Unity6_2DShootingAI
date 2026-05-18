@@ -9,8 +9,11 @@ namespace ShooterGame.Player
         [SerializeField] private SpriteRenderer _renderer;
         [SerializeField] private PlayerStats    _playerStats;
 
-        [SerializeField] private float _flashDuration = 0.08f;
-        [SerializeField] private float _blinkInterval = 0.09f;
+        [SerializeField] private float      _flashDuration        = 0.08f;
+        [SerializeField] private float      _blinkInterval        = 0.09f;
+
+        [Header("Spawn FX")]
+        [SerializeField] private GameObject _spawnFX; // Player 자식에 배치된 이펙트
 
         private static readonly Color _transparent = new Color(1f, 1f, 1f, 0f);
 
@@ -28,6 +31,9 @@ namespace ShooterGame.Player
         {
             if (_playerStats != null)
                 _playerStats.OnDied += HandleHit;
+
+            // 게임 시작 최초 스폰
+            PlaySpawnFX();
         }
 
         private void HandleHit()
@@ -36,13 +42,23 @@ namespace ShooterGame.Player
             _routine = StartCoroutine(HitEffectRoutine());
         }
 
+        private void PlaySpawnFX()
+        {
+            if (_spawnFX == null) return;
+            _spawnFX.SetActive(false); // 재발동을 위해 일단 끄고
+            _spawnFX.SetActive(true);
+        }
+
         private IEnumerator HitEffectRoutine()
         {
-            // 1. 흰색 플래시
+            // 1. 스폰 이펙트 발동
+            PlaySpawnFX();
+
+            // 2. 흰색 플래시
             _renderer.color = Color.white;
             yield return _flashWait;
 
-            // 2. 무적 시간 동안 깜빡임 (IsInvincible이 false가 되면 자동 종료)
+            // 3. 무적 시간 동안 깜빡임 (IsInvincible이 false가 되면 자동 종료)
             while (_playerStats.IsInvincible)
             {
                 _renderer.color = _transparent;
@@ -51,7 +67,7 @@ namespace ShooterGame.Player
                 yield return _blinkWait;
             }
 
-            // 3. 원래 색 복구
+            // 4. 원래 색 복구
             _renderer.color = Color.white;
             _routine = null;
         }

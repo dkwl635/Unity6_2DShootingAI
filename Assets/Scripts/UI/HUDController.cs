@@ -28,9 +28,10 @@ namespace ShooterGame.UI
 
 
         [Header("Panels")]
-        [SerializeField] private GameOverPanel   _gameOverPanel;
-        [SerializeField] private StageClearPanel _stageClearPanel;
-        [SerializeField] private LevelUpPanel    _levelUpPanel;
+        [SerializeField] private GameOverPanel    _gameOverPanel;
+        [SerializeField] private StageClearPanel  _stageClearPanel;
+        [SerializeField] private LevelUpPanel     _levelUpPanel;
+        [SerializeField] private BossWarningPanel _bossWarningPanel;
 
         [Header("Pause")]
         [SerializeField] private Button     _pauseButton;
@@ -83,9 +84,13 @@ namespace ShooterGame.UI
 
             if (StageManager.Instance != null)
             {
+                StageManager.Instance.OnBossWarning         += OnBossWarningHandler;
                 StageManager.Instance.OnFinalBossPhaseStart += OnBossPhaseStart;
                 StageManager.Instance.OnFinalBossPhaseEnd   += OnBossPhaseEnd;
             }
+
+            if (_bossWarningPanel != null)
+                _bossWarningPanel.OnComplete += ShowBossHpBar;
 
             _bossHpBox?.SetActive(false);
         }
@@ -111,12 +116,22 @@ namespace ShooterGame.UI
 
         // ── Boss HP Bar ──────────────────────────────────────────
 
+        private void OnBossWarningHandler()
+        {
+            _powerFillBox?.SetActive(false);
+            _bossWarningPanel?.Show();
+        }
+
         private void OnBossPhaseStart()
         {
+            // 보스 HP 추적은 즉시 시작, HP바 표시는 경고 패널 완료 후 ShowBossHpBar()에서
             _trackedBoss = FinalBossEnemy.ActiveBoss;
             if (_trackedBoss != null)
                 _trackedBoss.OnHpChanged += UpdateBossHp;
+        }
 
+        private void ShowBossHpBar()
+        {
             _powerFillBox?.SetActive(false);
             _bossHpBox?.SetActive(true);
             UpdateBossHp(_trackedBoss?.Hp ?? 0, _trackedBoss?.MaxHp ?? 1);
@@ -231,9 +246,13 @@ namespace ShooterGame.UI
 
             if (StageManager.Instance != null)
             {
+                StageManager.Instance.OnBossWarning         -= OnBossWarningHandler;
                 StageManager.Instance.OnFinalBossPhaseStart -= OnBossPhaseStart;
                 StageManager.Instance.OnFinalBossPhaseEnd   -= OnBossPhaseEnd;
             }
+
+            if (_bossWarningPanel != null)
+                _bossWarningPanel.OnComplete -= ShowBossHpBar;
 
             if (_trackedBoss != null)
                 _trackedBoss.OnHpChanged -= UpdateBossHp;

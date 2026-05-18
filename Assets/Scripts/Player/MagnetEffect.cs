@@ -9,10 +9,15 @@ namespace ShooterGame.Player
     {
         public static MagnetEffect Instance { get; private set; }
 
-        [SerializeField] private float magnetRadius = 1.5f;
-        [SerializeField] private float attractSpeed = 8f;
-        [SerializeField] private int   maxHits      = 80;
-        [SerializeField] private float detectInterval = 0.02f;
+        [SerializeField] private float     magnetRadius   = 1.5f;
+        [SerializeField] private float     attractSpeed   = 8f;
+        [SerializeField] private int       maxHits        = 80;
+        [SerializeField] private float     detectInterval = 0.02f;
+        [SerializeField] private LayerMask _dropLayerMask; // Inspector에서 Coin + Power 레이어 체크
+
+        [Header("FX")]
+        [SerializeField] private Transform _radiusFX;
+        [SerializeField] private float     _baseRadius = 1.5f; // scale 1일 때의 반경 (magnetRadius 기본값과 맞추기)
 
         private Collider2D[]   _hits;
         private WaitForSeconds _detectWait;
@@ -23,6 +28,7 @@ namespace ShooterGame.Player
             Instance    = this;
             _hits       = new Collider2D[maxHits];
             _detectWait = new WaitForSeconds(detectInterval);
+            UpdateFXScale();
         }
 
         private void OnEnable()  => StartCoroutine(DetectRoutine());
@@ -33,7 +39,7 @@ namespace ShooterGame.Player
             while (true)
             {
                 int count = Physics2D.OverlapCircleNonAlloc(
-                    transform.position, magnetRadius, _hits);
+                    transform.position, magnetRadius, _hits, _dropLayerMask);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -48,13 +54,22 @@ namespace ShooterGame.Player
 
         public float MagnetRadius => magnetRadius;
 
-        public void IncreaseRadius(float amount) => magnetRadius = Mathf.Max(0f, magnetRadius + amount);
+        public void IncreaseRadius(float amount)
+        {
+            magnetRadius = Mathf.Max(0f, magnetRadius + amount);
+            UpdateFXScale();
+        }
 
-        /// <summary>게임 시작 시 InGameManager가 한 번 호출. totalGain = gainPerLevel * level.</summary>
         public void ApplyPermanentMagnetBonus(float totalGain)
         {
             if (totalGain <= 0f) return;
             IncreaseRadius(totalGain);
+        }
+
+        private void UpdateFXScale()
+        {
+            if (_radiusFX == null || _baseRadius <= 0f) return;
+            _radiusFX.localScale = Vector3.one * (magnetRadius / _baseRadius);
         }
 
         private void OnDestroy()

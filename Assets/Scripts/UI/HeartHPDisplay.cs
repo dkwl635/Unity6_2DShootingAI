@@ -82,6 +82,7 @@ namespace ShooterGame.UI
                 img.sprite = _heartFull;
                 img.color  = _fullColor;
                 img.preserveAspect = true;
+                img.raycastTarget = false;
                 _hearts.Add(img);
             }
         }

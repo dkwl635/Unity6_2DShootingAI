@@ -39,6 +39,10 @@ namespace ShooterGame.Enemy
         [Header("Shared")]
         [SerializeField] private float spreadAngle  = 20f;
 
+        [Header("VFX")]
+        [SerializeField] private ParticleSystem[] _dieParticleSystems;
+        [SerializeField] private float            _deathParticleInterval = 0.5f; // 이펙트 발동 간격
+        [SerializeField] private float            _deathParticleSpread   = 1.2f; // 보스 주변 산포 반경
 
         public static FinalBossEnemy ActiveBoss { get; private set; }
 
@@ -191,6 +195,7 @@ namespace ShooterGame.Enemy
             }
 
             StartCoroutine(DeathSink());
+            StartCoroutine(DeathParticleRoutine());
         }
 
         private IEnumerator DeathSink()
@@ -208,6 +213,40 @@ namespace ShooterGame.Enemy
             }
 
             ReturnToPool();
+        }
+
+        private IEnumerator DeathParticleRoutine()
+        {
+            if (_dieParticleSystems == null || _dieParticleSystems.Length == 0) yield break;
+
+            var    wait    = new WaitForSeconds(_deathParticleInterval);
+            float  elapsed = 0f;
+            int    total   = _dieParticleSystems.Length;
+
+            while (elapsed < deathAnimTime)
+            {
+                // 배열 크기를 넘지 않는 범위에서 2~4개 랜덤 선택
+                int playCount = Mathf.Min(UnityEngine.Random.Range(2, 5), total);
+
+                // Fisher-Yates 셔플로 중복 없이 인덱스 선택
+                int[] indices = new int[total];
+                for (int i = 0; i < total; i++) indices[i] = i;
+                for (int i = total - 1; i > 0; i--)
+                {
+                    int j = UnityEngine.Random.Range(0, i + 1);
+                    (indices[i], indices[j]) = (indices[j], indices[i]);
+                }
+
+                for (int i = 0; i < playCount; i++)
+                {
+                    ParticleSystem ps = _dieParticleSystems[indices[i]];
+                    if (ps == null) continue;                  
+                    ps.Play();
+                }
+
+                yield return wait;
+                elapsed += _deathParticleInterval;
+            }
         }
 
         // ── Shooting ──────────────────────────────────────────────

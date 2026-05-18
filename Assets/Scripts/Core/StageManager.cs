@@ -29,21 +29,27 @@ namespace ShooterGame.Core
         public int  CurrentStage  { get; private set; } = 1;
         public bool IsInBossPhase { get; private set; }
 
-        public event Action<int>          OnStageComplete;
-        public event Action               OnFinalBossPhaseStart;
-        public event Action               OnFinalBossPhaseEnd;
-        // HUDController subscribes to show StageClearPanel
-        public event Action<int, float, int> OnLoopClear; // stage, elapsedTime, coins
+        public event Action<int>             OnStageComplete;
+        public event Action                  OnFinalBossPhaseStart;
+        public event Action                  OnFinalBossPhaseEnd;
+        public event Action                  OnBossWarning;        // 보스 등장 1초 전
+        public event Action<int, float, int> OnLoopClear;          // stage, elapsedTime, coins
+
+        [SerializeField] private float _bossWarningLeadTime  = 1f; // 보스 등장 몇 초 전에 경고할지
+        [SerializeField] private float _clearResultDelay     = 2f; // 보스 처치 후 결과창 표시 딜레이
 
         private float       _stageTimer;
         private bool        _miniBossSpawned;
+        private bool        _bossWarningFired;
         private PatternBase _activeMiniBoss;
         private PatternBase _activeFinalBoss;
+        private WaitForSeconds _clearResultWait;
 
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            _clearResultWait = new WaitForSeconds(_clearResultDelay);
         }
 
         private void Start()
@@ -71,6 +77,12 @@ namespace ShooterGame.Core
             {
                 _miniBossSpawned = true;
                 SpawnMiniBoss();
+            }
+
+            if (!_bossWarningFired && _stageTimer >= finalBossTime - _bossWarningLeadTime)
+            {
+                _bossWarningFired = true;
+                OnBossWarning?.Invoke();
             }
 
             if (_stageTimer >= finalBossTime)
@@ -143,6 +155,7 @@ namespace ShooterGame.Core
 
             if (isLoopClear)
             {
+                yield return _clearResultWait;
                 float elapsed = InGameManager.Instance != null ? InGameManager.Instance.ElapsedTime : 0f;
                 int   coins   = CoinSystem.Instance    != null ? CoinSystem.Instance.Total          : 0;
                 OnLoopClear?.Invoke(CurrentStage, elapsed, coins);
@@ -157,9 +170,10 @@ namespace ShooterGame.Core
             OnFinalBossPhaseEnd?.Invoke();
             DifficultyManager.Instance?.SetStage(CurrentStage);
 
-            _stageTimer      = 0f;
-            _miniBossSpawned = false;
-            IsInBossPhase    = false;
+            _stageTimer       = 0f;
+            _miniBossSpawned  = false;
+            _bossWarningFired = false;
+            IsInBossPhase     = false;
 
             PatternManager.Instance?.ResumePatterns();
             EnemySpawner.Instance?.ResumeSpawning();
@@ -212,10 +226,11 @@ namespace ShooterGame.Core
             }
 
            
-            _stageTimer  = 0f;
-            CurrentStage = 1;
-            _miniBossSpawned = false;
-            IsInBossPhase    = false;
+            _stageTimer       = 0f;
+            CurrentStage      = 1;
+            _miniBossSpawned  = false;
+            _bossWarningFired = false;
+            IsInBossPhase     = false;
             DifficultyManager.Instance?.SetStage(1);
         }
 
