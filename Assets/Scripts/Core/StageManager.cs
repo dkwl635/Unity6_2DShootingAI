@@ -4,7 +4,6 @@ using System.Collections;
 using UnityEngine;
 using ShooterGame.Economy;
 using ShooterGame.Enemy;
-using ShooterGame.UI;
 
 namespace ShooterGame.Core
 {
@@ -27,15 +26,14 @@ namespace ShooterGame.Core
         [SerializeField] private PatternConfig miniBossConfig;
         [SerializeField] private PatternConfig finalBossConfig;
 
-        [Header("UI")]
-        [SerializeField] private StageClearPanel _stageClearPanel;
-
         public int  CurrentStage  { get; private set; } = 1;
         public bool IsInBossPhase { get; private set; }
 
-        public event Action<int> OnStageComplete;
-        public event Action      OnFinalBossPhaseStart;
-        public event Action      OnFinalBossPhaseEnd;
+        public event Action<int>          OnStageComplete;
+        public event Action               OnFinalBossPhaseStart;
+        public event Action               OnFinalBossPhaseEnd;
+        // HUDController subscribes to show StageClearPanel
+        public event Action<int, float, int> OnLoopClear; // stage, elapsedTime, coins
 
         private float       _stageTimer;
         private bool        _miniBossSpawned;
@@ -145,15 +143,9 @@ namespace ShooterGame.Core
 
             if (isLoopClear)
             {
-                // Full loop clear — show panel (다시하기 = 씬 재로드, 나가기 = 로비)
-                if (_stageClearPanel != null)
-                {
-                    float elapsed = InGameManager.Instance != null ? InGameManager.Instance.ElapsedTime : 0f;
-                    int   coins   = CoinSystem.Instance    != null ? CoinSystem.Instance.Total          : 0;
-                    _stageClearPanel.Show(CurrentStage, elapsed, coins);
-                }
-
-                // 패널에서 버튼을 누르면 씬 전환이 일어나므로 여기서 대기할 필요 없음
+                float elapsed = InGameManager.Instance != null ? InGameManager.Instance.ElapsedTime : 0f;
+                int   coins   = CoinSystem.Instance    != null ? CoinSystem.Instance.Total          : 0;
+                OnLoopClear?.Invoke(CurrentStage, elapsed, coins);
                 yield break;
             }
             else
@@ -195,10 +187,6 @@ namespace ShooterGame.Core
                 _activeFinalBoss = null;
             }
 
-            if (_stageClearPanel != null)
-            {
-                _stageClearPanel.Hide();
-            }
             if (IsInBossPhase) OnFinalBossPhaseEnd?.Invoke();
             IsInBossPhase = false;
         }
@@ -223,10 +211,7 @@ namespace ShooterGame.Core
                 _activeFinalBoss = null;
             }
 
-            if (_stageClearPanel != null)
-            {               
-                _stageClearPanel.Hide();
-            }
+           
             _stageTimer  = 0f;
             CurrentStage = 1;
             _miniBossSpawned = false;

@@ -19,7 +19,6 @@ namespace ShooterGame.UI
 
         [Header("Button")]
         [SerializeField] private Button _upgradeButton;
-        [SerializeField] private TMP_Text _upgradeButtonText;
 
         public LobbyUpgradeType CurrentType => _currentType;
         public bool             IsShowing   => _isShowing;
@@ -91,15 +90,14 @@ namespace ShooterGame.UI
             {
                 float next = data.GetTotalGain(currentLevel + 1);
                 _sb.Append("현재: +").Append(current).Append(data.StatUnit)
-                   .Append("\n다음: +").Append(next).Append(data.StatUnit);
+                   .Append(" -> 다음: +").Append(next).Append(data.StatUnit);
             }
             _statText.text = _sb.ToString();
 
             // 버튼
             if (isMax)
             {
-                _costText.text              = "";
-                _upgradeButtonText.text     = "MAX";
+                _costText.text              = "MAX";               
                 _upgradeButton.interactable = false;
             }
             else
@@ -108,7 +106,6 @@ namespace ShooterGame.UI
                 _sb.Clear();
                 _sb.Append(cost).Append(" 코인");
                 _costText.text              = _sb.ToString();
-                _upgradeButtonText.text     = "업그레이드";
                 _upgradeButton.interactable = coins >= cost;
             }
         }

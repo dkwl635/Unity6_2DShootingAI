@@ -15,7 +15,7 @@ MonoBehaviour:
   _upgradeType: 0
   _displayName: "\uCD5C\uB300 \uCCB4\uB825"
   _description: "\uC2DC\uC791\uC2DC \uCCB4\uB825 \uC99D\uAC00"
-  _icon: {fileID: -1086276169051368572, guid: beacc98bba91d83479471607ccc644ed, type: 3}
+  _icon: {fileID: 2749491124465532341, guid: c37e18fcc07a2d9489141b84e6897e6e, type: 3}
   _statUnit: 
   _maxLevel: 3
   _baseCost: 1

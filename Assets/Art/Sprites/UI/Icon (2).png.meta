@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a0801d9d7b2de6b4cb90ed1db2f3b0a2
+guid: c37e18fcc07a2d9489141b84e6897e6e
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -158,10 +158,10 @@ TextureImporter:
       name: Icon (2)_0
       rect:
         serializedVersion: 2
-        x: 54
-        y: 1280
-        width: 561
-        height: 555
+        x: 70
+        y: 1307
+        width: 520
+        height: 528
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -224,10 +224,10 @@ TextureImporter:
       name: Icon (2)_3
       rect:
         serializedVersion: 2
-        x: 1696
-        y: 1278
-        width: 529
-        height: 547
+        x: 1704
+        y: 1282
+        width: 496
+        height: 542
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -268,10 +268,10 @@ TextureImporter:
       name: Icon (2)_5
       rect:
         serializedVersion: 2
-        x: 570
-        y: 698
-        width: 609
-        height: 502
+        x: 601
+        y: 689
+        width: 543
+        height: 512
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -291,9 +291,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 1207
-        y: 712
+        y: 729
         width: 421
-        height: 483
+        height: 466
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -334,10 +334,10 @@ TextureImporter:
       name: Icon (2)_8
       rect:
         serializedVersion: 2
-        x: 125
-        y: 119
-        width: 427
-        height: 472
+        x: 128
+        y: 121
+        width: 424
+        height: 470
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -402,7 +402,7 @@ TextureImporter:
         serializedVersion: 2
         x: 1716
         y: 165
-        width: 516
+        width: 483
         height: 425
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -422,7 +422,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 8f0acc73f4609b049b87ad4c3edac5d2
+    spriteID: fe868c0e1e2479247a645b41c5c7daa6
     internalID: 0
     vertices: []
     indices: 

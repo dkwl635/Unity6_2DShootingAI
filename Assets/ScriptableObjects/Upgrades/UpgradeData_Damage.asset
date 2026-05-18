@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: UpgradeData_Damage
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Upgrade.UpgradeData
   upgradeName: "\uB370\uBBF8\uC9C0 \uD5A5\uC0C1"
-  icon: {fileID: 2426117792199107389, guid: beacc98bba91d83479471607ccc644ed, type: 3}
+  icon: {fileID: -4959974382795337393, guid: c37e18fcc07a2d9489141b84e6897e6e, type: 3}
   type: 1
   value: 2
   weight: 10

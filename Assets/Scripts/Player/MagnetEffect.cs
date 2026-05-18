@@ -61,5 +61,15 @@ namespace ShooterGame.Player
         {
             if (Instance == this) Instance = null;
         }
+
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = new Color(0f, 0.8f, 1f, 0.3f);
+            Gizmos.DrawSphere(transform.position, magnetRadius);
+            Gizmos.color = new Color(0f, 0.8f, 1f, 1f);
+            Gizmos.DrawWireSphere(transform.position, magnetRadius);
+        }
+#endif
     }
 }

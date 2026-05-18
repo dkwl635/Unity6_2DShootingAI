@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: UpgradeData_ExpBoost
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Upgrade.UpgradeData
   upgradeName: "\uACBD\uD5D8\uCE58 \uC99D\uD3ED"
-  icon: {fileID: -1086276169051368572, guid: beacc98bba91d83479471607ccc644ed, type: 3}
+  icon: {fileID: -3442731734395223606, guid: c37e18fcc07a2d9489141b84e6897e6e, type: 3}
   type: 2
   value: 0.5
   weight: 8

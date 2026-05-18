@@ -1,6 +1,7 @@
 // Attach to: LobbyController GameObject (Lobby scene)
 using UnityEngine;
 using DG.Tweening;
+using ShooterGame.Meta;
 using ShooterGame.UI;
 
 namespace ShooterGame.Core
@@ -23,17 +24,29 @@ namespace ShooterGame.Core
         private void Start()
         {
             AudioManager.Instance?.PlayLobbyBGM();
-            if (_titlePanel != null)
-            {
-                _titlePanel.OnTitleTouched += StartTitleTransition;
-                _titlePanel.gameObject.SetActive(true);
-            }
 
-            if (_lobbyPanel != null) 
+            bool showTitle = GameManager.Instance == null || !GameManager.Instance.HasVisitedLobby;
+
+            if (showTitle)
             {
-                _lobbyPanel.gameObject.SetActive(false);
+                if (_titlePanel != null)
+                {
+                    _titlePanel.OnTitleTouched += StartTitleTransition;
+                    _titlePanel.gameObject.SetActive(true);
+                }
+                if (_lobbyPanel != null)
+                    _lobbyPanel.gameObject.SetActive(false);
             }
-            
+            else
+            {
+                if (_titlePanel != null)
+                    _titlePanel.gameObject.SetActive(false);
+
+                if (_cam != null)
+                    _cam.orthographicSize = _zoomTargetSize;
+                if (_lobbyPanel != null)
+                    _lobbyPanel.gameObject.SetActive(true);
+            }
         }
 
         private void OnDestroy()
@@ -44,6 +57,7 @@ namespace ShooterGame.Core
 
         private void StartTitleTransition()
         {
+            GameManager.Instance?.MarkLobbyVisited();
             _titlePanel?.gameObject.SetActive(false);
 
             DOTween.To(

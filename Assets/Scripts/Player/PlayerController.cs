@@ -9,11 +9,13 @@ namespace ShooterGame.Player
     {
         [SerializeField] private float          maxMoveSpeed = 10f;
         [SerializeField] private VirtualJoystick joystick;
+        [SerializeField] private float _spawnPosY;
+
 
         private Camera      _cam;
         private PlayerStats _playerStats;
         private float       _minX, _maxX, _minY, _maxY;
-
+        
         private void Awake()
         {
             _cam         = Camera.main;
@@ -38,7 +40,7 @@ namespace ShooterGame.Player
         private void Respawn()
         {
             if (_playerStats.Lives <= 0) return;
-            transform.position = new Vector3(0f, _minY, 0f);
+            transform.position = new Vector3(0f, _spawnPosY, 0f);
         }
 
         // ── Movement ──────────────────────────────────────────────

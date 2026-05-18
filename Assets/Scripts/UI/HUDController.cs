@@ -7,6 +7,7 @@ using ShooterGame.Core;
 using ShooterGame.Economy;
 using ShooterGame.Enemy;
 using ShooterGame.Player;
+using ShooterGame.Upgrade;
 
 namespace ShooterGame.UI
 {
@@ -26,6 +27,11 @@ namespace ShooterGame.UI
         [SerializeField] private Image      _bossHpFill;
 
 
+        [Header("Panels")]
+        [SerializeField] private GameOverPanel   _gameOverPanel;
+        [SerializeField] private StageClearPanel _stageClearPanel;
+        [SerializeField] private LevelUpPanel    _levelUpPanel;
+
         [Header("Pause")]
         [SerializeField] private Button     _pauseButton;
         [SerializeField] private PausePanel _pausePanel;
@@ -41,6 +47,18 @@ namespace ShooterGame.UI
         {
             if (_pauseButton != null)
                 _pauseButton.onClick.AddListener(OnPauseClicked);
+
+            if (InGameManager.Instance != null)
+                InGameManager.Instance.OnGameOver += OnGameOverHandler;
+
+            if (StageManager.Instance != null)
+                StageManager.Instance.OnLoopClear += OnLoopClearHandler;
+
+            if (UpgradeManager.Instance != null)
+            {
+                UpgradeManager.Instance.OnLevelUpReady   += OnLevelUpReadyHandler;
+                UpgradeManager.Instance.OnUpgradeApplied += OnUpgradeAppliedHandler;
+            }
 
             if (ScoreManager.Instance != null)
             {
@@ -151,6 +169,33 @@ namespace ShooterGame.UI
             _levelText.text = _sb.ToString();
         }
 
+        // ── UI Panel Handlers ────────────────────────────────────
+
+        private void OnGameOverHandler()
+        {
+            _stageClearPanel?.Hide(); // dismiss if showing at time of death
+
+            int   stage   = StageManager.Instance != null ? StageManager.Instance.CurrentStage : 0;
+            float elapsed = InGameManager.Instance != null ? InGameManager.Instance.ElapsedTime : 0f;
+            int   coins   = CoinSystem.Instance   != null ? CoinSystem.Instance.Total           : 0;
+            _gameOverPanel?.Show(stage, elapsed, coins);
+        }
+
+        private void OnLoopClearHandler(int stage, float elapsed, int coins)
+        {
+            _stageClearPanel?.Show(stage, elapsed, coins);
+        }
+
+        private void OnLevelUpReadyHandler(UpgradeData[] picks)
+        {
+            _levelUpPanel?.Show(picks);
+        }
+
+        private void OnUpgradeAppliedHandler()
+        {
+            _levelUpPanel?.Hide();
+        }
+
         private void OnPauseClicked()
         {
             _pausePanel?.Show();
@@ -160,6 +205,18 @@ namespace ShooterGame.UI
         {
             if (_pauseButton != null)
                 _pauseButton.onClick.RemoveListener(OnPauseClicked);
+
+            if (InGameManager.Instance != null)
+                InGameManager.Instance.OnGameOver -= OnGameOverHandler;
+
+            if (StageManager.Instance != null)
+                StageManager.Instance.OnLoopClear -= OnLoopClearHandler;
+
+            if (UpgradeManager.Instance != null)
+            {
+                UpgradeManager.Instance.OnLevelUpReady   -= OnLevelUpReadyHandler;
+                UpgradeManager.Instance.OnUpgradeApplied -= OnUpgradeAppliedHandler;
+            }
 
             if (ScoreManager.Instance != null)
                 ScoreManager.Instance.OnScoreChanged -= OnScoreChanged;

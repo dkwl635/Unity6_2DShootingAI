@@ -1,10 +1,10 @@
 // Attach to: UpgradeManager GameObject (Game scene only — no DontDestroyOnLoad)
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ShooterGame.Core;
 using ShooterGame.Economy;
 using ShooterGame.Player;
-using ShooterGame.UI;
 
 namespace ShooterGame.Upgrade
 {
@@ -12,8 +12,11 @@ namespace ShooterGame.Upgrade
     {
         public static UpgradeManager Instance { get; private set; }
 
+        // HUDController subscribes to show/hide LevelUpPanel
+        public event Action<UpgradeData[]> OnLevelUpReady;
+        public event Action                OnUpgradeApplied;
+
         [SerializeField] private List<UpgradeData> upgradePool;
-        [SerializeField] private LevelUpPanel      levelUpPanel;
         [SerializeField] private PlayerShooter     playerShooter;
         [SerializeField] private PlayerStats       playerStats;
 
@@ -39,7 +42,7 @@ namespace ShooterGame.Upgrade
         {
             AudioManager.Instance?.PlaySFX(SfxType.LevelUp);
             UpgradeData[] picks = PickRandom(3);
-            levelUpPanel.Show(picks);
+            OnLevelUpReady?.Invoke(picks);
         }
 
         private UpgradeData[] PickRandom(int count)
@@ -58,7 +61,7 @@ namespace ShooterGame.Upgrade
                 int totalWeight = 0;
                 foreach (UpgradeData d in _eligible) totalWeight += d.Weight;
 
-                int roll        = Random.Range(0, totalWeight);
+                int roll        = UnityEngine.Random.Range(0, totalWeight);
                 int accumulated = 0;
                 for (int j = 0; j < _eligible.Count; j++)
                 {
@@ -95,7 +98,7 @@ namespace ShooterGame.Upgrade
                     break;
             }
             _appliedCounts[data.Type] = GetAppliedCount(data.Type) + 1;
-            levelUpPanel.Hide();
+            OnUpgradeApplied?.Invoke();
         }
 
         private void OnDestroy()

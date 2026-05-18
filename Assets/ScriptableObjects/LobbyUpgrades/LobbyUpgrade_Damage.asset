@@ -15,7 +15,7 @@ MonoBehaviour:
   _upgradeType: 1
   _displayName: "\uACF5\uACA9\uB825"
   _description: "\uBBF8\uC0AC\uC77C \uACF5\uACA9\uB825 \uC99D\uAC00"
-  _icon: {fileID: 2426117792199107389, guid: beacc98bba91d83479471607ccc644ed, type: 3}
+  _icon: {fileID: -4959974382795337393, guid: c37e18fcc07a2d9489141b84e6897e6e, type: 3}
   _statUnit: 
   _maxLevel: 5
   _baseCost: 100

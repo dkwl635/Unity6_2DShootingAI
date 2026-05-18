@@ -3,68 +3,93 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using ShooterGame.Core;
+using UnityEditor.Hardware;
+using UnityEditor.SceneManagement;
+using TMPro;
+using System.Text;
+using ShooterGame.Economy;
+using ShooterGame.Meta;
 
 namespace ShooterGame.UI
 {
     public class GameOverPanel : MonoBehaviour
     {
-        [SerializeField] private Button          _restartButton;
-        [SerializeField] private Button          _lobbyButton;
-        [SerializeField] private VirtualJoystick _joystick;
+        [Header("Labels")]
+        [SerializeField] private TMP_Text _stageText;
+        [SerializeField] private TMP_Text _timeText;
+        [SerializeField] private TMP_Text _coinText;
 
-        private CanvasGroup _group;
+        [Header("Buttons")]
+        [SerializeField] private Button _continueButton;
+        [SerializeField] private Button _lobbyButton;
 
-        private void Awake()
-        {
-            _group = GetComponent<CanvasGroup>();
-            if (_group == null) _group = gameObject.AddComponent<CanvasGroup>();
-            _group.alpha          = 0f;
-            _group.interactable   = false;
-            _group.blocksRaycasts = false;
-        }
+        private readonly StringBuilder _sb = new StringBuilder(32);
 
         private void Start()
         {
-            if (InGameManager.Instance != null)
-                InGameManager.Instance.OnGameOver += Show;
+            _continueButton?.onClick.AddListener(HandleContinue);
+            _lobbyButton?.onClick.AddListener(HandleLobby);
 
-            _restartButton?.onClick.AddListener(OnRestart);
-            _lobbyButton?.onClick.AddListener(OnLobby);
         }
 
-        private void Show()
+        public void Show(int stage, float elapsedTime, int coins)
         {
-            _group.alpha          = 1f;
-            _group.interactable   = true;
-            _group.blocksRaycasts = true;
-            Time.timeScale = 0f;
+            if (_stageText != null)
+                _stageText.text = $"달성 : 스테이지{stage}";
 
-            if (_joystick != null)
+            if (_timeText != null)
             {
-                _joystick.ResetInput();
-                _joystick.gameObject.SetActive(false);
+                int total = (int)elapsedTime;
+                int m = total / 60;
+                int s = total % 60;
+                _sb.Clear();
+                _sb.Append("플레이 시간   ");
+                if (m < 10) _sb.Append('0');
+                _sb.Append(m).Append(':');
+                if (s < 10) _sb.Append('0');
+                _sb.Append(s);
+                _timeText.text = _sb.ToString();
             }
+
+            if (_coinText != null)
+            {
+                _sb.Clear();
+                _sb.Append("획득 코인   ").Append(coins);
+                _coinText.text = _sb.ToString();
+            }
+
+            Time.timeScale = 0f;
+            gameObject.SetActive(true);
         }
 
-        private void OnRestart()
+        public void Hide()
         {
             Time.timeScale = 1f;
-            SceneManager.LoadScene("Game");
+            gameObject.SetActive(false);
         }
 
-        private void OnLobby()
+        // ── Button Handlers ───────────────────────────────────────
+
+        private void HandleContinue()
         {
+            AudioManager.Instance?.PlaySFX(SfxType.ButtonClick);
             Time.timeScale = 1f;
-            SceneManager.LoadScene("Lobby");
+            GameManager.Instance.LoadGameScene();
+        }
+
+        private void HandleLobby()
+        {
+            AudioManager.Instance?.PlaySFX(SfxType.ButtonClick);
+            int earned = CoinSystem.Instance != null ? CoinSystem.Instance.Total : 0;
+            SaveManager.Instance?.AddCoins(earned);
+            Time.timeScale = 1f;
+            GameManager.Instance.LoadLobbyScene();
         }
 
         private void OnDestroy()
         {
-            if (InGameManager.Instance != null)
-                InGameManager.Instance.OnGameOver -= Show;
-
-            _restartButton?.onClick.RemoveListener(OnRestart);
-            _lobbyButton?.onClick.RemoveListener(OnLobby);
+            _continueButton?.onClick.RemoveListener(HandleContinue);
+            _lobbyButton?.onClick.RemoveListener(HandleLobby);
         }
     }
 }

@@ -19,6 +19,11 @@ namespace ShooterGame.Core
         public event Action OnGameSceneLoaded;
         public event Action OnLobbySceneLoaded;
 
+        // ── Session State ────────────────────────────────────────
+        // Runtime-only: resets to false on every app launch.
+        // True once the user has passed the title screen this session.
+        public bool HasVisitedLobby { get; private set; }
+
         // ── Scene Names ──────────────────────────────────────────
         private const string SCENE_LOBBY = "Lobby";
         private const string SCENE_GAME  = "Game";
@@ -50,6 +55,11 @@ namespace ShooterGame.Core
         {
             SceneManager.LoadScene(SCENE_LOBBY);
             OnLobbySceneLoaded?.Invoke();
+        }
+
+        public void MarkLobbyVisited()
+        {
+            HasVisitedLobby = true;
         }
 
         // ── App Lifecycle ────────────────────────────────────────
