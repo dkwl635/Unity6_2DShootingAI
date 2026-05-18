@@ -4,6 +4,7 @@ using System.Collections;
 using UnityEngine;
 using ShooterGame.Core;
 using ShooterGame.UI;
+using ShooterGame.Utils;
 
 namespace ShooterGame.Enemy
 {
@@ -22,7 +23,6 @@ namespace ShooterGame.Enemy
         [SerializeField] private int   phase2BulletCount  = 7;
         [SerializeField] private float phase2FireInterval = 1.0f;
         [SerializeField] private float phase2SpeedBonus   = 1.5f;
-        [SerializeField] private float phase2HpThreshold  = 0.5f;
         [SerializeField] private Sprite phase2Sprite;
 
         [Header("Phase 2 Flash")]
@@ -31,6 +31,10 @@ namespace ShooterGame.Enemy
         [SerializeField] private float flashHold    = 0.15f;
         [SerializeField] private float flashFadeOut = 0.4f;
 
+        [Header("Phase 2 Shake")]
+        [SerializeField] private float phase2ShakeDuration  = 0.5f;
+        [SerializeField] private float phase2ShakeMagnitude = 0.3f;
+
         [Header("Death")]
         [SerializeField] private Sprite destroyedSprite;
         [SerializeField] private float  deathSinkSpeed = 4f;
@@ -38,6 +42,25 @@ namespace ShooterGame.Enemy
 
         [Header("Shared")]
         [SerializeField] private float spreadAngle  = 20f;
+
+        [Header("Aimed Shot")]
+        [SerializeField] private int   phase1AimedCount    = 3;
+        [SerializeField] private float phase1AimedInterval = 3.0f;  // 조준 공격 주기
+        [SerializeField] private float phase1AimDuration   = 1.0f;  // 조준선 표시 시간
+        [SerializeField] private float phase1BurstDelay    = 0.12f; // 연발 사이 딜레이
+        [SerializeField] private int   phase2AimedCount    = 5;
+        [SerializeField] private float phase2AimedInterval = 2.0f;
+        [SerializeField] private float phase2AimDuration   = 0.6f;
+        [SerializeField] private float phase2BurstDelay    = 0.08f;
+
+        [Header("Aim Line")]
+        [SerializeField] private LineRenderer _aimLine;
+        [SerializeField] private Color        _aimLineColor    = new Color(1f, 0.1f, 0.1f, 1f);
+        [SerializeField] private float        _aimLineWidth    = 0.04f;
+        [SerializeField] private float        _aimFlickerSpeed = 10f;
+
+        [Header("Audio")]
+        [SerializeField] private AudioClip _bossBgm;
 
         [Header("VFX")]
         [SerializeField] private ParticleSystem[] _dieParticleSystems;
@@ -58,23 +81,45 @@ namespace ShooterGame.Enemy
         private bool           _isDying;
         private int            _maxHp;
         private Coroutine      _shootCoroutine;
+        private Coroutine      _aimedCoroutine;
         private WaitForSeconds _phase1Wait;
         private WaitForSeconds _phase2Wait;
+        private WaitForSeconds _phase1AimedWait;
+        private WaitForSeconds _phase2AimedWait;
+        private WaitForSeconds _phase1BurstWait;
+        private WaitForSeconds _phase2BurstWait;
+        private Transform      _playerTransform;
         private SpriteRenderer _sr;
         private Sprite         _originalSprite;
 
         protected override void OnEnable()
         {
             base.OnEnable();
+            AudioManager.Instance?.PlayBgmClip(_bossBgm);
             ActiveBoss      = this;
             _reachedCenter  = false;
             _sweepTimer     = 0f;
             _isPhase2       = false;
             _isInvincible   = true;   // 하강 중 무적
             _isDying        = false;
-            _shootCoroutine = null;
-            _phase1Wait     = new WaitForSeconds(phase1FireInterval);
-            _phase2Wait     = new WaitForSeconds(phase2FireInterval);
+            _shootCoroutine  = null;
+            _aimedCoroutine  = null;
+            _playerTransform = null;
+            _phase1Wait      = new WaitForSeconds(phase1FireInterval);
+            _phase2Wait      = new WaitForSeconds(phase2FireInterval);
+            _phase1AimedWait = new WaitForSeconds(phase1AimedInterval);
+            _phase2AimedWait = new WaitForSeconds(phase2AimedInterval);
+            _phase1BurstWait = new WaitForSeconds(phase1BurstDelay);
+            _phase2BurstWait = new WaitForSeconds(phase2BurstDelay);
+            if (_aimLine != null)
+            {
+                _aimLine.positionCount = 2;
+                _aimLine.useWorldSpace = false; // 로컬 공간 — position[0]=zero가 항상 보스 위치
+                _aimLine.startWidth    = _aimLineWidth;
+                _aimLine.endWidth      = _aimLineWidth * 0.3f;
+                _aimLine.SetPosition(0, Vector3.zero);
+                _aimLine.enabled       = false;
+            }
             if (_sr == null)
             {
                 _sr = GetComponent<SpriteRenderer>();
@@ -90,11 +135,7 @@ namespace ShooterGame.Enemy
         private void OnDisable()
         {
             if (ActiveBoss == this) ActiveBoss = null;
-            if (_shootCoroutine != null)
-            {
-                StopCoroutine(_shootCoroutine);
-                _shootCoroutine = null;
-            }
+            StopShootingCoroutines();
         }
 
         public override void Initialize(EnemyData data, float hpMultiplier, float speedMultiplier,
@@ -108,9 +149,18 @@ namespace ShooterGame.Enemy
         public override void TakeDamage(int dmg)
         {
             if (_isInvincible || _isDying) return;
+
+            if (!_isPhase2 && CurrentHp - dmg <= 0)
+            {
+                // 1페이즈 HP 0 도달 — 실제 사망 대신 2페이즈 전환
+                CurrentHp = 0;
+                OnHpChanged?.Invoke(0, _maxHp);
+                EnterPhase2();
+                return;
+            }
+
             base.TakeDamage(dmg);
             OnHpChanged?.Invoke(Mathf.Max(0, CurrentHp), _maxHp);
-            if (!_isPhase2 && CurrentHp > 0) CheckPhaseTransition();
         }
 
         protected override void Move()
@@ -127,6 +177,7 @@ namespace ShooterGame.Enemy
                     _reachedCenter  = true;
                     _isInvincible   = false;
                     _shootCoroutine = StartCoroutine(ShootLoop());
+                    _aimedCoroutine = StartCoroutine(AimedShootLoop());
                 }
             }
             else
@@ -139,12 +190,6 @@ namespace ShooterGame.Enemy
 
         // ── Phase 2 ──────────────────────────────────────────────
 
-        private void CheckPhaseTransition()
-        {
-            if (CurrentHp <= Mathf.RoundToInt(_maxHp * phase2HpThreshold))
-                EnterPhase2();
-        }
-
         private void EnterPhase2()
         {
             _isPhase2 = true;
@@ -154,14 +199,13 @@ namespace ShooterGame.Enemy
         private IEnumerator Phase2Transition()
         {
             _isInvincible = true;
+            StopShootingCoroutines();
 
-            if (_shootCoroutine != null)
-            {
-                StopCoroutine(_shootCoroutine);
-                _shootCoroutine = null;
-            }
-
-            // 화면 플래시 시작
+            // HP 100% 회복 + 탄막 제거 + 쉐이크 + 플래시
+            CurrentHp = _maxHp;
+            OnHpChanged?.Invoke(CurrentHp, _maxHp);
+            EnemyBulletPool.Instance?.ReleaseAll();
+            CameraShake.Instance?.Shake(phase2ShakeDuration, phase2ShakeMagnitude);
             ScreenFlashUI.Instance?.Flash(flashColor, flashFadeIn, flashHold, flashFadeOut);
 
             // 페이드인 피크(절반) 지점에서 스프라이트 교체
@@ -174,9 +218,10 @@ namespace ShooterGame.Enemy
             yield return new WaitForSeconds(flashHold + flashFadeOut);
 
             // 플래시 끝난 후 속도 강화 + 사격 재개
-            CurrentSpeed *= phase2SpeedBonus;
-            _isInvincible  = false;
-            _shootCoroutine = StartCoroutine(ShootLoop());
+            CurrentSpeed    *= phase2SpeedBonus;
+            _isInvincible    = false;
+            _shootCoroutine  = StartCoroutine(ShootLoop());
+            _aimedCoroutine  = StartCoroutine(AimedShootLoop());
         }
 
         // ── Death ─────────────────────────────────────────────────
@@ -187,12 +232,8 @@ namespace ShooterGame.Enemy
             _isDying = true;
 
             TriggerDeathEffects();
-
-            if (_shootCoroutine != null)
-            {
-                StopCoroutine(_shootCoroutine);
-                _shootCoroutine = null;
-            }
+            StopShootingCoroutines();
+            EnemyBulletPool.Instance?.ReleaseAll();
 
             StartCoroutine(DeathSink());
             StartCoroutine(DeathParticleRoutine());
@@ -251,6 +292,13 @@ namespace ShooterGame.Enemy
 
         // ── Shooting ──────────────────────────────────────────────
 
+        private void StopShootingCoroutines()
+        {
+            if (_shootCoroutine != null) { StopCoroutine(_shootCoroutine); _shootCoroutine = null; }
+            if (_aimedCoroutine != null) { StopCoroutine(_aimedCoroutine); _aimedCoroutine = null; }
+            if (_aimLine != null) _aimLine.enabled = false;
+        }
+
         private IEnumerator ShootLoop()
         {
             while (true)
@@ -258,6 +306,76 @@ namespace ShooterGame.Enemy
                 yield return _isPhase2 ? _phase2Wait : _phase1Wait;
                 FireSpread(_isPhase2 ? phase2BulletCount : phase1BulletCount);
             }
+        }
+
+        private IEnumerator AimedShootLoop()
+        {
+            while (true)
+            {
+                yield return _isPhase2 ? _phase2AimedWait : _phase1AimedWait;
+                yield return StartCoroutine(AimAndFireBurst());
+            }
+        }
+
+        private IEnumerator AimAndFireBurst()
+        {
+            int   count       = _isPhase2 ? phase2AimedCount    : phase1AimedCount;
+            float aimDuration = _isPhase2 ? phase2AimDuration   : phase1AimDuration;
+            var   burstWait   = _isPhase2 ? _phase2BurstWait    : _phase1BurstWait;
+
+            // 플레이어 캐싱
+            if (_playerTransform == null)
+            {
+                GameObject p = GameObject.FindWithTag(Constants.TAG_PLAYER);
+                if (p != null) _playerTransform = p.transform;
+            }
+
+            // 조준선 표시 + 깜빡임
+            if (_aimLine != null) _aimLine.enabled = true;
+            for (float t = 0f; t < aimDuration; t += Time.deltaTime)
+            {
+                if (_aimLine != null && _playerTransform != null)
+                {
+                    _aimLine.SetPosition(1, transform.InverseTransformPoint(_playerTransform.position));
+
+                    float alpha = (Mathf.Sin(t * _aimFlickerSpeed) + 1f) * 0.5f;
+                    Color c     = _aimLineColor;
+                    c.a = alpha;
+                    _aimLine.startColor = c;
+                    c.a = alpha * 0.2f;
+                    _aimLine.endColor = c;
+                }
+                yield return null;
+            }
+            if (_playerTransform == null)
+            {
+                if (_aimLine != null) _aimLine.enabled = false;
+                yield break;
+            }
+
+            // 조준 방향 고정 후 연속 발사 — 마지막 탄까지 조준선 유지
+            Vector2 dir   = (_playerTransform.position - transform.position).normalized;
+            float   angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
+
+            for (int i = 0; i < count; i++)
+            {
+                // 발사 중에도 조준선 갱신 (solid)
+                if (_aimLine != null && _playerTransform != null)
+                {
+                    _aimLine.SetPosition(1, transform.InverseTransformPoint(_playerTransform.position));
+                    _aimLine.startColor = _aimLineColor;
+                    Color endC = _aimLineColor;
+                    endC.a = _aimLineColor.a * 0.2f;
+                    _aimLine.endColor = endC;
+                }
+
+                FireBulletAt(angle);
+                AudioManager.Instance?.PlaySFX(SfxType.EnemyShoot);
+                if (i < count - 1) yield return burstWait;
+            }
+
+            // 모든 탄 발사 완료 후 조준선 제거
+            if (_aimLine != null) _aimLine.enabled = false;
         }
 
         private void FireSpread(int count)
@@ -276,6 +394,15 @@ namespace ShooterGame.Enemy
             if (bullet == null) return;
             bullet.transform.position = transform.position;
             bullet.transform.rotation = Quaternion.Euler(0f, 0f, 180f + angleOffset);
+            bullet.Initialize(EnemyBulletPool.Instance);
+        }
+
+        private void FireBulletAt(float worldAngle)
+        {
+            EnemyBullet bullet = EnemyBulletPool.Instance.Get();
+            if (bullet == null) return;
+            bullet.transform.position = transform.position;
+            bullet.transform.rotation = Quaternion.Euler(0f, 0f, worldAngle);
             bullet.Initialize(EnemyBulletPool.Instance);
         }
     }

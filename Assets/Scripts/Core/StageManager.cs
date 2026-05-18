@@ -29,14 +29,18 @@ namespace ShooterGame.Core
         public int  CurrentStage  { get; private set; } = 1;
         public bool IsInBossPhase { get; private set; }
 
+        public event Action<int>             OnStageStart;
         public event Action<int>             OnStageComplete;
         public event Action                  OnFinalBossPhaseStart;
         public event Action                  OnFinalBossPhaseEnd;
         public event Action                  OnBossWarning;        // 보스 등장 1초 전
         public event Action<int, float, int> OnLoopClear;          // stage, elapsedTime, coins
 
-        [SerializeField] private float _bossWarningLeadTime  = 1f; // 보스 등장 몇 초 전에 경고할지
-        [SerializeField] private float _clearResultDelay     = 2f; // 보스 처치 후 결과창 표시 딜레이
+        [SerializeField] private float _bossWarningLeadTime    = 1f;  // 보스 등장 몇 초 전에 경고할지
+        [SerializeField] private float _clearResultDelay       = 2f;  // 보스 처치 후 결과창 표시 딜레이
+        [SerializeField] private float _stageTransitionDelay   = 2f;  // 중간 스테이지 전환 딜레이
+        [SerializeField] private float _bgmRestoreDelay        = 5f;  // 보스 처치 후 원래 BGM 복귀 딜레이
+        [SerializeField] private float _bgmFadeDuration        = 1.5f;
 
         private float       _stageTimer;
         private bool        _miniBossSpawned;
@@ -44,21 +48,25 @@ namespace ShooterGame.Core
         private PatternBase _activeMiniBoss;
         private PatternBase _activeFinalBoss;
         private WaitForSeconds _clearResultWait;
+        private WaitForSeconds _stageTransitionWait;
+        private WaitForSeconds _bgmRestoreWait;
 
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            _clearResultWait = new WaitForSeconds(_clearResultDelay);
+            _clearResultWait     = new WaitForSeconds(_clearResultDelay);
+            _stageTransitionWait = new WaitForSeconds(_stageTransitionDelay);
+            _bgmRestoreWait      = new WaitForSeconds(_bgmRestoreDelay);
         }
 
         private void Start()
         {
             if (InGameManager.Instance != null)
             {
-                InGameManager.Instance.OnGameStart += OnGameStart;
-                InGameManager.Instance.OnGameOver  += OnGameOver;
-                if (InGameManager.Instance.IsGameRunning) OnGameStart();
+                InGameManager.Instance.OnPreGameStart += OnPreGameStart;
+                InGameManager.Instance.OnGameStart    += OnGameStart;
+                InGameManager.Instance.OnGameOver     += OnGameOver;
             }
             else
             {
@@ -163,8 +171,10 @@ namespace ShooterGame.Core
             }
             else
             {
-                // Intermediate stage — advance immediately, no panel
                 CurrentStage++;
+                StartCoroutine(RestoreBgmAfterDelay());
+                OnStageStart?.Invoke(CurrentStage);
+                yield return _stageTransitionWait;
             }
 
             OnFinalBossPhaseEnd?.Invoke();
@@ -177,6 +187,12 @@ namespace ShooterGame.Core
 
             PatternManager.Instance?.ResumePatterns();
             EnemySpawner.Instance?.ResumeSpawning();
+        }
+
+        private IEnumerator RestoreBgmAfterDelay()
+        {
+            yield return _bgmRestoreWait;
+            AudioManager.Instance?.CrossfadeToGameBgm(_bgmFadeDuration);
         }
 
         // ── Game Over ─────────────────────────────────────────────
@@ -205,7 +221,7 @@ namespace ShooterGame.Core
             IsInBossPhase = false;
         }
 
-        private void OnGameStart()
+        private void OnPreGameStart()
         {
             StopAllCoroutines();
 
@@ -225,21 +241,24 @@ namespace ShooterGame.Core
                 _activeFinalBoss = null;
             }
 
-           
             _stageTimer       = 0f;
             CurrentStage      = 1;
             _miniBossSpawned  = false;
             _bossWarningFired = false;
             IsInBossPhase     = false;
             DifficultyManager.Instance?.SetStage(1);
+            OnStageStart?.Invoke(CurrentStage); // 딜레이 전에 패널 표시
         }
+
+        private void OnGameStart() { }
 
         private void OnDestroy()
         {
             if (InGameManager.Instance != null)
             {
-                InGameManager.Instance.OnGameStart -= OnGameStart;
-                InGameManager.Instance.OnGameOver  -= OnGameOver;
+                InGameManager.Instance.OnPreGameStart -= OnPreGameStart;
+                InGameManager.Instance.OnGameStart    -= OnGameStart;
+                InGameManager.Instance.OnGameOver     -= OnGameOver;
             }
             if (Instance == this) Instance = null;
         }

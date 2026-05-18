@@ -2,6 +2,7 @@
 // Responsibility: In-game session state only — running flag, elapsed time, game-over trigger.
 
 using System;
+using System.Collections;
 using UnityEngine;
 using ShooterGame.Economy;
 using ShooterGame.Meta;
@@ -15,6 +16,7 @@ namespace ShooterGame.Core
         public static InGameManager Instance { get; private set; }
 
         // ── Events ───────────────────────────────────────────────
+        public event Action OnPreGameStart; // 게임 시작 전 — UI 준비용 (딜레이 전)
         public event Action OnGameStart;
         public event Action OnGameOver;
 
@@ -29,6 +31,11 @@ namespace ShooterGame.Core
         // 배열 인덱스 = (int)LobbyUpgradeType 순서와 일치
         [SerializeField] private LobbyUpgradeData[] _lobbyUpgrades;
 
+        [Header("Start Delay")]
+        [SerializeField] private float _startDelay = 1f;
+
+        private WaitForSeconds _startWait;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -42,7 +49,16 @@ namespace ShooterGame.Core
 
         private void Start()
         {
+            _startWait = new WaitForSeconds(_startDelay);
             ApplyPermanentBonuses();
+            StartCoroutine(InitSequence());
+        }
+
+        private IEnumerator InitSequence()
+        {
+            yield return null;
+            OnPreGameStart?.Invoke();
+            yield return _startWait;
             StartGame();
         }
 

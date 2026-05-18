@@ -141,6 +141,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Enemy.LinearDescentEnemy
   hitFlashMaterial: {fileID: 2100000, guid: c909000f88f445746bce844108e666c2, type: 2}
   flashDuration: 0.08
+  _deathSfx: {fileID: 8300000, guid: 70fded410f30b244da97acba7d2e87d5, type: 3}
 --- !u!58 &8399428450692796000
 CircleCollider2D:
   m_ObjectHideFlags: 0

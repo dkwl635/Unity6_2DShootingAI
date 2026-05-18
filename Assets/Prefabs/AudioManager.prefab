@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8826921865015431804
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4085511636749807053}
+  - component: {fileID: 936459542892271471}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4085511636749807053
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8826921865015431804}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &936459542892271471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8826921865015431804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca6848ff49b05ac459d737d0d904e94c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShooterGame.Core.AudioManager
+  _bgmGame: {fileID: 8300000, guid: dcd20f5a05a679f41b82b9868db6b7bb, type: 3}
+  _bgmLobby: {fileID: 8300000, guid: 69f4c9eb1819ce74b9c03e90d59e0877, type: 3}
+  _bgmVolume: 0.4
+  _sfxPlayerShoot: {fileID: 8300000, guid: 4b65b8adf1a5d436785169345c0264fd, type: 3}
+  _sfxCoinPickup: {fileID: 8300000, guid: 5671d5483395f4d3abb7d9d0380a5e88, type: 3}
+  _sfxPowerPickup: {fileID: 8300000, guid: b50a5de5297164efe8ba6d2b0b4b7d4d, type: 3}
+  _sfxLevelUp: {fileID: 8300000, guid: 91daf65c6f4b34601987b01c16ee394c, type: 3}
+  _sfxPlayerHit: {fileID: 8300000, guid: 7a3425a4be3824548a882a539d96bbd7, type: 3}
+  _sfxGameOver: {fileID: 8300000, guid: 8c8cf390751984ba59f5827d68ddbdeb, type: 3}
+  _sfxButtonClick: {fileID: 0}
+  _sfxEnemyShoot: {fileID: 8300000, guid: 7a36f3dd55fa646d1bf44ca02fc73842, type: 3}
+  _sfxVolume: 0.4
+  _sfxPoolSize: 8

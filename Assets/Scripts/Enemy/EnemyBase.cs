@@ -14,8 +14,9 @@ namespace ShooterGame.Enemy
         protected int   CurrentHp;
         protected float CurrentSpeed;
 
-        [SerializeField] private Material hitFlashMaterial;
-        [SerializeField] private float    flashDuration = 0.08f;
+        [SerializeField] private Material  hitFlashMaterial;
+        [SerializeField] private float     flashDuration = 0.08f;
+        [SerializeField] private AudioClip _deathSfx;
 
         private EnemyData         _data;
         private Action<EnemyBase> _releaseCallback;
@@ -109,7 +110,7 @@ namespace ShooterGame.Enemy
         protected void TriggerDeathEffects()
         {
             EffectManager.Instance?.Play(EffectType.Explosion, transform.position);
-            AudioManager.Instance?.PlaySFX(SfxType.EnemyDeath);
+            AudioManager.Instance?.PlaySfxClip(_deathSfx);
             ScoreManager.Instance?.Add(_data.ScoreValue);
 
             int   droppedCoin        = UnityEngine.Random.value < _data.CoinDropChance  ? _data.CoinDrop  : 0;

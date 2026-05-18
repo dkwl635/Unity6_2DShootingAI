@@ -19,12 +19,14 @@ namespace ShooterGame.UI
 
         [Header("Power Bar")]
         [SerializeField] private GameObject _powerFillBox;
-        [SerializeField] private Image _powerFill;
-        [SerializeField] private TMP_Text _levelText;
+        [SerializeField] private Image      _powerFill;
+        [SerializeField] private TMP_Text   _levelText;
+        [SerializeField] private float      _powerLerpSpeed = 6f;
 
         [Header("Boss HP Bar")]
         [SerializeField] private GameObject _bossHpBox;
         [SerializeField] private Image      _bossHpFill;
+        [SerializeField] private float      _bossHpLerpSpeed = 6f;
 
 
         [Header("Panels")]
@@ -32,6 +34,7 @@ namespace ShooterGame.UI
         [SerializeField] private StageClearPanel  _stageClearPanel;
         [SerializeField] private LevelUpPanel     _levelUpPanel;
         [SerializeField] private BossWarningPanel _bossWarningPanel;
+        [SerializeField] private StageStartPanel  _stageStartPanel;
 
         [Header("Pause")]
         [SerializeField] private Button     _pauseButton;
@@ -43,6 +46,8 @@ namespace ShooterGame.UI
         private readonly StringBuilder _sb = new StringBuilder(16);
         private int             _lastSeconds = -1;
         private FinalBossEnemy  _trackedBoss;
+        private float           _powerFillTarget;
+        private float           _bossHpTarget;
 
         private void Start()
         {
@@ -84,6 +89,7 @@ namespace ShooterGame.UI
 
             if (StageManager.Instance != null)
             {
+                StageManager.Instance.OnStageStart          += OnStageStartHandler;
                 StageManager.Instance.OnBossWarning         += OnBossWarningHandler;
                 StageManager.Instance.OnFinalBossPhaseStart += OnBossPhaseStart;
                 StageManager.Instance.OnFinalBossPhaseEnd   += OnBossPhaseEnd;
@@ -99,6 +105,19 @@ namespace ShooterGame.UI
         {
             if (InGameManager.Instance == null || !InGameManager.Instance.IsGameRunning) return;
 
+            // Power bar lerp
+            if (_powerFill != null)
+                _powerFill.fillAmount = Mathf.Lerp(
+                    _powerFill.fillAmount, _powerFillTarget,
+                    Time.deltaTime * _powerLerpSpeed);
+
+            // Boss HP bar lerp
+            if (_bossHpFill != null && _bossHpBox != null && _bossHpBox.activeSelf)
+                _bossHpFill.fillAmount = Mathf.Lerp(
+                    _bossHpFill.fillAmount, _bossHpTarget,
+                    Time.deltaTime * _bossHpLerpSpeed);
+
+            // Timer (초 단위로만 갱신)
             int seconds = (int)InGameManager.Instance.ElapsedTime;
             if (seconds == _lastSeconds) return;
             _lastSeconds = seconds;
@@ -115,6 +134,11 @@ namespace ShooterGame.UI
         }
 
         // ── Boss HP Bar ──────────────────────────────────────────
+
+        private void OnStageStartHandler(int stage)
+        {
+            _stageStartPanel?.Show(stage);
+        }
 
         private void OnBossWarningHandler()
         {
@@ -133,8 +157,11 @@ namespace ShooterGame.UI
         private void ShowBossHpBar()
         {
             _powerFillBox?.SetActive(false);
+            int hp    = _trackedBoss?.Hp    ?? 0;
+            int maxHp = _trackedBoss?.MaxHp ?? 1;
+            _bossHpTarget = maxHp > 0 ? (float)hp / maxHp : 0f;
+            if (_bossHpFill != null) _bossHpFill.fillAmount = _bossHpTarget; // 첫 표시는 즉시
             _bossHpBox?.SetActive(true);
-            UpdateBossHp(_trackedBoss?.Hp ?? 0, _trackedBoss?.MaxHp ?? 1);
         }
 
         private void OnBossPhaseEnd()
@@ -150,9 +177,7 @@ namespace ShooterGame.UI
 
         private void UpdateBossHp(int current, int max)
         {
-            if (_bossHpFill != null)
-                _bossHpFill.fillAmount = max > 0 ? (float)current / max : 0f;
-            
+            _bossHpTarget = max > 0 ? (float)current / max : 0f;
         }
 
         // ── Event Handlers ───────────────────────────────────────
@@ -172,8 +197,7 @@ namespace ShooterGame.UI
 
         private void OnPowerChanged(int current, int toNext)
         {
-            if (_powerFill != null)
-                _powerFill.fillAmount = toNext > 0 ? (float)current / toNext : 0f;
+            _powerFillTarget = toNext > 0 ? (float)current / toNext : 0f;
         }
 
         private void OnLevelUp(int level)
@@ -246,6 +270,7 @@ namespace ShooterGame.UI
 
             if (StageManager.Instance != null)
             {
+                StageManager.Instance.OnStageStart          -= OnStageStartHandler;
                 StageManager.Instance.OnBossWarning         -= OnBossWarningHandler;
                 StageManager.Instance.OnFinalBossPhaseStart -= OnBossPhaseStart;
                 StageManager.Instance.OnFinalBossPhaseEnd   -= OnBossPhaseEnd;

@@ -20,8 +20,19 @@ namespace ShooterGame.Enemy
             _pool = new ObjectPool<EnemyBullet>(bulletPrefab, poolSize, transform);
         }
 
-        public EnemyBullet Get()               => _pool.Get();
+        public EnemyBullet Get()                  => _pool.Get();
         public void        Release(EnemyBullet b) => _pool.Release(b);
+
+        public void ReleaseAll()
+        {
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                Transform child = transform.GetChild(i);
+                if (!child.gameObject.activeSelf) continue;
+                EnemyBullet b = child.GetComponent<EnemyBullet>();
+                if (b != null) _pool.Release(b);
+            }
+        }
 
         private void OnDestroy()
         {
