@@ -91,6 +91,7 @@ namespace ShooterGame.Enemy
         private int            _maxHp;
         private Coroutine      _shootCoroutine;
         private Coroutine      _aimedCoroutine;
+        private Coroutine      _laserAttackCoroutine;
         private WaitForSeconds _phase1Wait;
         private WaitForSeconds _phase2Wait;
         private WaitForSeconds _phase1AimedWait;
@@ -110,8 +111,9 @@ namespace ShooterGame.Enemy
             _isPhase2       = false;
             _isInvincible   = true;   // 하강 중 무적
             _isDying        = false;
-            _shootCoroutine  = null;
-            _aimedCoroutine  = null;
+            _shootCoroutine       = null;
+            _aimedCoroutine       = null;
+            _laserAttackCoroutine = null;
             _playerTransform = null;
             _phase1Wait      = new WaitForSeconds(phase1FireInterval);
             _phase2Wait      = new WaitForSeconds(phase2FireInterval);
@@ -307,8 +309,9 @@ namespace ShooterGame.Enemy
 
         private void StopShootingCoroutines()
         {
-            if (_shootCoroutine != null) { StopCoroutine(_shootCoroutine); _shootCoroutine = null; }
-            if (_aimedCoroutine != null) { StopCoroutine(_aimedCoroutine); _aimedCoroutine = null; }
+            if (_shootCoroutine       != null) { StopCoroutine(_shootCoroutine);       _shootCoroutine       = null; }
+            if (_aimedCoroutine       != null) { StopCoroutine(_aimedCoroutine);       _aimedCoroutine       = null; }
+            if (_laserAttackCoroutine != null) { StopCoroutine(_laserAttackCoroutine); _laserAttackCoroutine = null; }
             if (_aimLine   != null) _aimLine.enabled   = false;
             if (_laserLine != null) _laserLine.enabled = false;
         }
@@ -327,7 +330,9 @@ namespace ShooterGame.Enemy
             while (true)
             {
                 yield return _isPhase2 ? _phase2AimedWait : _phase1AimedWait;
-                yield return StartCoroutine(LaserAttack());
+                _laserAttackCoroutine = StartCoroutine(LaserAttack());
+                yield return _laserAttackCoroutine;
+                _laserAttackCoroutine = null;
             }
         }
 
