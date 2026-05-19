@@ -60,6 +60,7 @@ namespace ShooterGame.Enemy
         [SerializeField] private LineRenderer _laserLine;
         [SerializeField] private Color        _laserColor      = new Color(1f, 0.6f, 0.1f, 1f);
         [SerializeField] private float        _laserWidth      = 0.25f;
+        [SerializeField] private float        _laserPreDelay   = 0.2f;
         [SerializeField] private float        _laserDuration   = 1f;
         [SerializeField] private int          _laserDamage     = 3;
         [SerializeField] private float        _laserLength     = 20f;
@@ -92,6 +93,7 @@ namespace ShooterGame.Enemy
         private WaitForSeconds _phase2Wait;
         private WaitForSeconds _phase1AimedWait;
         private WaitForSeconds _phase2AimedWait;
+        private WaitForSeconds _laserPreWait;
         private Transform      _playerTransform;
         private SpriteRenderer _sr;
         private Sprite         _originalSprite;
@@ -113,6 +115,7 @@ namespace ShooterGame.Enemy
             _phase2Wait      = new WaitForSeconds(phase2FireInterval);
             _phase1AimedWait = new WaitForSeconds(phase1AimedInterval);
             _phase2AimedWait = new WaitForSeconds(phase2AimedInterval);
+            _laserPreWait    = new WaitForSeconds(_laserPreDelay);
             if (_aimLine != null)
             {
                 _aimLine.positionCount = 2;
@@ -358,6 +361,18 @@ namespace ShooterGame.Enemy
 
             // ── Lock direction ────────────────────────────────────
             Vector2 dir = (_playerTransform.position - transform.position).normalized;
+
+            // ── Pre-fire warning: solid aim line for _laserPreDelay so player can dodge
+            if (_aimLine != null)
+            {
+                _aimLine.SetPosition(1, (Vector3)dir * _laserLength);
+                _aimLine.startColor = _aimLineColor;
+                Color endC = _aimLineColor; endC.a = 0f;
+                _aimLine.endColor = endC;
+                _aimLine.enabled  = true;
+            }
+            yield return _laserPreWait;
+            if (_aimLine != null) _aimLine.enabled = false;
 
             // ── Fire phase: wide beam, origin follows sweeping boss
             if (_laserLine != null)
