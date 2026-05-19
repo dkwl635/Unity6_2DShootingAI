@@ -62,8 +62,9 @@ namespace ShooterGame.Enemy
         [SerializeField] private float        _laserWidth      = 0.25f;
         [SerializeField] private float        _laserPreDelay    = 0.2f;
         [SerializeField] private float        _laserDuration    = 1f;
-        [SerializeField] private float        _laserTickInterval = 0.2f;
-        [SerializeField] private int          _laserDamage      = 3;
+        [SerializeField] private float        _laserTickInterval  = 0.2f;
+        [SerializeField] private float        _laserTrackSpeed    = 60f;
+        [SerializeField] private int          _laserDamage        = 3;
         [SerializeField] private float        _laserLength     = 20f;
         [SerializeField] private LayerMask    _playerLayerMask;
 
@@ -387,11 +388,21 @@ namespace ShooterGame.Enemy
 
             AudioManager.Instance?.PlaySFX(SfxType.EnemyShoot);
 
-            float elapsed     = 0f;
-            float damageTimer = _laserTickInterval; // trigger check immediately on first frame
+            float elapsed      = 0f;
+            float damageTimer  = _laserTickInterval; // trigger check immediately on first frame
+            float currentAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
             while (elapsed < _laserDuration)
             {
+                // Rotate laser toward player at fixed angular speed — creates tracking lag
+                if (_playerTransform != null)
+                {
+                    Vector2 toPlayer    = ((Vector2)_playerTransform.position - (Vector2)transform.position).normalized;
+                    float   targetAngle = Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg;
+                    currentAngle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, _laserTrackSpeed * Time.deltaTime);
+                    dir = new Vector2(Mathf.Cos(currentAngle * Mathf.Deg2Rad), Mathf.Sin(currentAngle * Mathf.Deg2Rad));
+                }
+
                 if (_laserLine != null)
                 {
                     _laserLine.SetPosition(0, transform.position);
