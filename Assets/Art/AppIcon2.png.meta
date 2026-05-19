@@ -1,22 +1,10 @@
 fileFormatVersion: 2
-guid: 4b746cdbb8fe8004187b61c4a13c3b65
+guid: c53112c9653687541925bf020dd3f1bd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 435496050252848350
-    second: Boss_Destroy (1)_0
-  - first:
-      213: 1744150960778215674
-    second: Boss_Destroy (1)_1
-  - first:
-      213: -6399772030348713237
-    second: Boss_Destroy (1)_2
-  - first:
-      213: 8532679075876012450
-    second: Boss_Destroy (1)_3
-  - first:
-      213: 4786982195564188421
-    second: Boss_Destroy (1)_4
+      213: -7669877203939794491
+    second: AppIcon2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -63,9 +51,9 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 300
-  spriteBorder: {x: 0, y: 0, z: 0, w: 2}
-  spriteGenerateFallbackPhysicsShape: 0
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -112,12 +100,12 @@ TextureImporter:
     buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: 47
+    textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
-    overridden: 1
+    overridden: 0
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
@@ -125,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Boss_Destroy (1)_0
+      name: AppIcon2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 2382
-        height: 1792
+        width: 1254
+        height: 1254
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: edc1860b9513b0600800000000000000
-      internalID: 435496050252848350
+      spriteID: 5c16d4cd15f1f8590800000000000000
+      internalID: -7669877203939794491
       vertices: []
       indices: 
       edges: []
@@ -150,8 +138,8 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    spriteID: 
+    internalID: 0
     vertices: []
     indices: 
     edges: []
@@ -160,11 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Boss_Destroy (1)_0: 435496050252848350
-      Boss_Destroy (1)_1: 1744150960778215674
-      Boss_Destroy (1)_2: -6399772030348713237
-      Boss_Destroy (1)_3: 8532679075876012450
-      Boss_Destroy (1)_4: 4786982195564188421
+      AppIcon2_0: -7669877203939794491
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -40,7 +40,6 @@ namespace ShooterGame.Core
         [SerializeField] private float _clearResultDelay       = 2f;  // 보스 처치 후 결과창 표시 딜레이
         [SerializeField] private float _stageTransitionDelay   = 2f;  // 중간 스테이지 전환 딜레이
         [SerializeField] private float _bgmRestoreDelay        = 5f;  // 보스 처치 후 원래 BGM 복귀 딜레이
-        [SerializeField] private float _bgmFadeDuration        = 1.5f;
 
         private float       _stageTimer;
         private bool        _miniBossSpawned;
@@ -192,7 +191,7 @@ namespace ShooterGame.Core
         private IEnumerator RestoreBgmAfterDelay()
         {
             yield return _bgmRestoreWait;
-            AudioManager.Instance?.CrossfadeToGameBgm(_bgmFadeDuration);
+            AudioManager.Instance?.PlayGameBGM();
         }
 
         // ── Game Over ─────────────────────────────────────────────

@@ -98,7 +98,7 @@ namespace ShooterGame.UI
             if (isMax)
             {
                 _costText.text              = "MAX";               
-                _upgradeButton.interactable = false;
+               
             }
             else
             {
@@ -106,7 +106,7 @@ namespace ShooterGame.UI
                 _sb.Clear();
                 _sb.Append(cost).Append(" 코인");
                 _costText.text              = _sb.ToString();
-                _upgradeButton.interactable = coins >= cost;
+
             }
         }
 

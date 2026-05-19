@@ -20,8 +20,8 @@ namespace ShooterGame.Utils
         public const string PREF_BEST_SCORE    = "BestScore";
         public const string PREF_TOTAL_COINS   = "TotalCoins";
         public const string PREF_LOBBY_UPGRADE = "LobbyUpgrade_"; // append (int)LobbyUpgradeType
-        public const string PREF_BGM_VOLUME    = "BgmVolume";
-        public const string PREF_SFX_VOLUME    = "SfxVolume";
+        public const string PREF_BGM_VOLUME    = "BGM";
+        public const string PREF_SFX_VOLUME    = "SFX";
 
         // ── Object Pool Default Sizes ───────────────────────────
         public const int POOL_SIZE_BULLET = 30;

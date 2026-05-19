@@ -53,7 +53,10 @@ MonoBehaviour:
   _sfxLevelUp: {fileID: 8300000, guid: 91daf65c6f4b34601987b01c16ee394c, type: 3}
   _sfxPlayerHit: {fileID: 8300000, guid: 7a3425a4be3824548a882a539d96bbd7, type: 3}
   _sfxGameOver: {fileID: 8300000, guid: 8c8cf390751984ba59f5827d68ddbdeb, type: 3}
-  _sfxButtonClick: {fileID: 0}
+  _sfxButtonClick: {fileID: 8300000, guid: 4083140ddb972e14ba6b03b7c995557e, type: 3}
   _sfxEnemyShoot: {fileID: 8300000, guid: 7a36f3dd55fa646d1bf44ca02fc73842, type: 3}
   _sfxVolume: 0.4
   _sfxPoolSize: 8
+  _mixer: {fileID: 24100000, guid: 6071e306a9d96fb4a8b7d444a4c77959, type: 2}
+  _bgmGroup: {fileID: 6053084043410184838, guid: 6071e306a9d96fb4a8b7d444a4c77959, type: 2}
+  _sfxGroup: {fileID: 1573930574187136253, guid: 6071e306a9d96fb4a8b7d444a4c77959, type: 2}

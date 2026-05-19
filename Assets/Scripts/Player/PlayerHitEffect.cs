@@ -21,6 +21,8 @@ namespace ShooterGame.Player
         private WaitForSeconds _blinkWait;
         private Coroutine      _routine;
 
+        private bool _firstSpawn = true;
+
         private void Awake()
         {
             _flashWait = new WaitForSeconds(_flashDuration);
@@ -33,6 +35,7 @@ namespace ShooterGame.Player
                 _playerStats.OnDied += HandleHit;
 
             // 게임 시작 최초 스폰
+            _firstSpawn = true;
             PlaySpawnFX();
         }
 
@@ -45,6 +48,7 @@ namespace ShooterGame.Player
         private void PlaySpawnFX()
         {
             if (_spawnFX == null) return;
+            if (_firstSpawn) { _firstSpawn = false; return; }
             _spawnFX.SetActive(false); // 재발동을 위해 일단 끄고
             _spawnFX.SetActive(true);
         }

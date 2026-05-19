@@ -1,6 +1,7 @@
 // Attach to: AudioManager GameObject (DontDestroyOnLoad)
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Audio;
 using ShooterGame.Utils;
 
 namespace ShooterGame.Core
@@ -14,6 +15,7 @@ namespace ShooterGame.Core
         PlayerHit,
         GameOver,
         ButtonClick,
+        ButtonTitle,
         EnemyShoot,
     }
 
@@ -34,11 +36,17 @@ namespace ShooterGame.Core
         [SerializeField] private AudioClip _sfxPlayerHit;
         [SerializeField] private AudioClip _sfxGameOver;
         [SerializeField] private AudioClip _sfxButtonClick;
+        [SerializeField] private AudioClip _sfxButtonTitle;
         [SerializeField] private AudioClip _sfxEnemyShoot;
 
         [Header("SFX Pool")]
         [SerializeField] [Range(0f, 1f)] private float _sfxVolume   = 0.7f;
         [SerializeField] private int _sfxPoolSize = 8;
+
+        [Header("Audio Mixer")]
+        [SerializeField] private AudioMixer      _mixer;
+        [SerializeField] private AudioMixerGroup _bgmGroup;
+        [SerializeField] private AudioMixerGroup _sfxGroup;
 
         private AudioSource   _bgmSource;
         private AudioSource[] _sfxPool;
@@ -60,6 +68,7 @@ namespace ShooterGame.Core
             BuildBgmSource();
             BuildSfxPool();
             PreloadAllClips();
+            ApplyVolumesToMixer();
         }
 
         // ── BGM ─────────────────────────────────────────────────────
@@ -74,8 +83,7 @@ namespace ShooterGame.Core
         {
             if (clip == null) return;
             AudioSource src = NextSfxSource();
-            src.clip   = clip;
-            src.volume = _sfxVolume;
+            src.clip = clip;
             src.Play();
         }
 
@@ -98,17 +106,20 @@ namespace ShooterGame.Core
         public void SetBgmVolume(float volume)
         {
             _bgmVolume = Mathf.Clamp01(volume);
-            _bgmSource.volume = _bgmVolume;
+            _mixer?.SetFloat("BGMVolume", LinearToDb(_bgmVolume));
             PlayerPrefs.SetFloat(Constants.PREF_BGM_VOLUME, _bgmVolume);
         }
 
         public void SetSfxVolume(float volume)
         {
             _sfxVolume = Mathf.Clamp01(volume);
+            _mixer?.SetFloat("SFXVolume", LinearToDb(_sfxVolume));
             PlayerPrefs.SetFloat(Constants.PREF_SFX_VOLUME, _sfxVolume);
         }
 
         // ── SFX ─────────────────────────────────────────────────────
+
+        public void PlayButtonClick() => PlaySFX(SfxType.ButtonClick);
 
         public void PlaySFX(SfxType type)
         {
@@ -116,8 +127,7 @@ namespace ShooterGame.Core
             if (clip == null) return;
 
             AudioSource src = NextSfxSource();
-            src.clip   = clip;
-            src.volume = _sfxVolume;
+            src.clip = clip;
             src.Play();
         }
 
@@ -128,8 +138,7 @@ namespace ShooterGame.Core
             if (clip == null) return;
             if (_bgmSource.clip == clip && _bgmSource.isPlaying) return;
             CancelFade();
-            _bgmSource.clip   = clip;
-            _bgmSource.volume = _bgmVolume;
+            _bgmSource.clip = clip;
             _bgmSource.Play();
         }
 
@@ -138,7 +147,7 @@ namespace ShooterGame.Core
             if (_fadeCoroutine == null) return;
             StopCoroutine(_fadeCoroutine);
             _fadeCoroutine = null;
-            _bgmSource.volume = _bgmVolume;
+            _bgmSource.volume = 1f;
         }
 
         private IEnumerator CrossfadeRoutine(AudioClip clip, float fadeDuration)
@@ -160,10 +169,10 @@ namespace ShooterGame.Core
                 // 페이드 인
                 for (float t = 0f; t < fadeDuration; t += Time.deltaTime)
                 {
-                    _bgmSource.volume = Mathf.Lerp(0f, _bgmVolume, t / fadeDuration);
+                    _bgmSource.volume = Mathf.Lerp(0f, 1f, t / fadeDuration);
                     yield return null;
                 }
-                _bgmSource.volume = _bgmVolume;
+                _bgmSource.volume = 1f;
             }
 
             _fadeCoroutine = null;
@@ -185,6 +194,7 @@ namespace ShooterGame.Core
             SfxType.PlayerHit    => _sfxPlayerHit,
             SfxType.GameOver     => _sfxGameOver,
             SfxType.ButtonClick  => _sfxButtonClick,
+            SfxType.ButtonTitle  => _sfxButtonTitle,
             SfxType.EnemyShoot   => _sfxEnemyShoot,
             _                    => null
         };
@@ -203,6 +213,7 @@ namespace ShooterGame.Core
             TryLoad(_sfxPlayerHit);
             TryLoad(_sfxGameOver);
             TryLoad(_sfxButtonClick);
+            TryLoad(_sfxButtonTitle);
             TryLoad(_sfxEnemyShoot);
         }
 
@@ -216,8 +227,9 @@ namespace ShooterGame.Core
         {
             _bgmSource        = gameObject.AddComponent<AudioSource>();
             _bgmSource.loop   = true;
-            _bgmSource.volume = _bgmVolume;
-            _bgmSource.playOnAwake = false;
+            _bgmSource.volume = 1f;
+            _bgmSource.playOnAwake           = false;
+            _bgmSource.outputAudioMixerGroup = _bgmGroup;
         }
 
         private void BuildSfxPool()
@@ -226,11 +238,21 @@ namespace ShooterGame.Core
             for (int i = 0; i < _sfxPoolSize; i++)
             {
                 var src = gameObject.AddComponent<AudioSource>();
-                src.loop        = false;
-                src.playOnAwake = false;
-                _sfxPool[i]     = src;
+                src.loop                  = false;
+                src.playOnAwake           = false;
+                src.outputAudioMixerGroup = _sfxGroup;
+                _sfxPool[i]               = src;
             }
         }
+
+        private void ApplyVolumesToMixer()
+        {
+            _mixer?.SetFloat("BGMVolume", LinearToDb(_bgmVolume));
+            _mixer?.SetFloat("SFXVolume", LinearToDb(_sfxVolume));
+        }
+
+        private static float LinearToDb(float linear)
+            => linear > 0.0001f ? Mathf.Log10(linear) * 20f : -80f;
 
         private void OnDestroy()
         {
