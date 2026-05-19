@@ -60,9 +60,10 @@ namespace ShooterGame.Enemy
         [SerializeField] private LineRenderer _laserLine;
         [SerializeField] private Color        _laserColor      = new Color(1f, 0.6f, 0.1f, 1f);
         [SerializeField] private float        _laserWidth      = 0.25f;
-        [SerializeField] private float        _laserPreDelay   = 0.2f;
-        [SerializeField] private float        _laserDuration   = 1f;
-        [SerializeField] private int          _laserDamage     = 3;
+        [SerializeField] private float        _laserPreDelay    = 0.2f;
+        [SerializeField] private float        _laserDuration    = 1f;
+        [SerializeField] private float        _laserTickInterval = 0.2f;
+        [SerializeField] private int          _laserDamage      = 3;
         [SerializeField] private float        _laserLength     = 20f;
         [SerializeField] private LayerMask    _playerLayerMask;
 
@@ -386,8 +387,8 @@ namespace ShooterGame.Enemy
 
             AudioManager.Instance?.PlaySFX(SfxType.EnemyShoot);
 
-            bool  damageDealt = false;
             float elapsed     = 0f;
+            float damageTimer = _laserTickInterval; // trigger check immediately on first frame
 
             while (elapsed < _laserDuration)
             {
@@ -397,16 +398,16 @@ namespace ShooterGame.Enemy
                     _laserLine.SetPosition(1, (Vector2)transform.position + dir * _laserLength);
                 }
 
-                // Raycast damage applied once on the first frame
-                if (!damageDealt)
+                damageTimer += Time.deltaTime;
+                if (damageTimer >= _laserTickInterval)
                 {
+                    damageTimer -= _laserTickInterval;
                     RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, _laserLength, _playerLayerMask);
                     if (hit.collider != null)
                     {
                         PlayerStats stats = hit.collider.GetComponent<PlayerStats>();
                         stats?.TakeDamage(_laserDamage);
                     }
-                    damageDealt = true;
                 }
 
                 elapsed += Time.deltaTime;
