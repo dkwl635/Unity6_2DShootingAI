@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using ShooterGame.Core;
+using ShooterGame.Player;
 using ShooterGame.UI;
 using ShooterGame.Utils;
 
@@ -44,20 +45,25 @@ namespace ShooterGame.Enemy
         [SerializeField] private float spreadAngle  = 20f;
 
         [Header("Aimed Shot")]
-        [SerializeField] private int   phase1AimedCount    = 3;
-        [SerializeField] private float phase1AimedInterval = 3.0f;  // 조준 공격 주기
-        [SerializeField] private float phase1AimDuration   = 1.0f;  // 조준선 표시 시간
-        [SerializeField] private float phase1BurstDelay    = 0.12f; // 연발 사이 딜레이
-        [SerializeField] private int   phase2AimedCount    = 5;
+        [SerializeField] private float phase1AimedInterval = 3.0f;
+        [SerializeField] private float phase1AimDuration   = 1.0f;
         [SerializeField] private float phase2AimedInterval = 2.0f;
         [SerializeField] private float phase2AimDuration   = 0.6f;
-        [SerializeField] private float phase2BurstDelay    = 0.08f;
 
         [Header("Aim Line")]
         [SerializeField] private LineRenderer _aimLine;
         [SerializeField] private Color        _aimLineColor    = new Color(1f, 0.1f, 0.1f, 1f);
         [SerializeField] private float        _aimLineWidth    = 0.04f;
         [SerializeField] private float        _aimFlickerSpeed = 10f;
+
+        [Header("Laser")]
+        [SerializeField] private LineRenderer _laserLine;
+        [SerializeField] private Color        _laserColor      = new Color(1f, 0.6f, 0.1f, 1f);
+        [SerializeField] private float        _laserWidth      = 0.25f;
+        [SerializeField] private float        _laserDuration   = 1f;
+        [SerializeField] private int          _laserDamage     = 3;
+        [SerializeField] private float        _laserLength     = 20f;
+        [SerializeField] private LayerMask    _playerLayerMask;
 
         [Header("Audio")]
         [SerializeField] private AudioClip _bossBgm;
@@ -86,8 +92,6 @@ namespace ShooterGame.Enemy
         private WaitForSeconds _phase2Wait;
         private WaitForSeconds _phase1AimedWait;
         private WaitForSeconds _phase2AimedWait;
-        private WaitForSeconds _phase1BurstWait;
-        private WaitForSeconds _phase2BurstWait;
         private Transform      _playerTransform;
         private SpriteRenderer _sr;
         private Sprite         _originalSprite;
@@ -109,8 +113,6 @@ namespace ShooterGame.Enemy
             _phase2Wait      = new WaitForSeconds(phase2FireInterval);
             _phase1AimedWait = new WaitForSeconds(phase1AimedInterval);
             _phase2AimedWait = new WaitForSeconds(phase2AimedInterval);
-            _phase1BurstWait = new WaitForSeconds(phase1BurstDelay);
-            _phase2BurstWait = new WaitForSeconds(phase2BurstDelay);
             if (_aimLine != null)
             {
                 _aimLine.positionCount = 2;
@@ -119,6 +121,12 @@ namespace ShooterGame.Enemy
                 _aimLine.endWidth      = _aimLineWidth * 0.3f;
                 _aimLine.SetPosition(0, Vector3.zero);
                 _aimLine.enabled       = false;
+            }
+            if (_laserLine != null)
+            {
+                _laserLine.positionCount = 2;
+                _laserLine.useWorldSpace = true;
+                _laserLine.enabled       = false;
             }
             if (_sr == null)
             {
@@ -177,7 +185,7 @@ namespace ShooterGame.Enemy
                     _reachedCenter  = true;
                     _isInvincible   = false;
                     _shootCoroutine = StartCoroutine(ShootLoop());
-                    _aimedCoroutine = StartCoroutine(AimedShootLoop());
+                    _aimedCoroutine = StartCoroutine(LaserAttackLoop());
                 }
             }
             else
@@ -221,7 +229,7 @@ namespace ShooterGame.Enemy
             CurrentSpeed    *= phase2SpeedBonus;
             _isInvincible    = false;
             _shootCoroutine  = StartCoroutine(ShootLoop());
-            _aimedCoroutine  = StartCoroutine(AimedShootLoop());
+            _aimedCoroutine  = StartCoroutine(LaserAttackLoop());
         }
 
         // ── Death ─────────────────────────────────────────────────
@@ -296,7 +304,8 @@ namespace ShooterGame.Enemy
         {
             if (_shootCoroutine != null) { StopCoroutine(_shootCoroutine); _shootCoroutine = null; }
             if (_aimedCoroutine != null) { StopCoroutine(_aimedCoroutine); _aimedCoroutine = null; }
-            if (_aimLine != null) _aimLine.enabled = false;
+            if (_aimLine   != null) _aimLine.enabled   = false;
+            if (_laserLine != null) _laserLine.enabled = false;
         }
 
         private IEnumerator ShootLoop()
@@ -308,36 +317,32 @@ namespace ShooterGame.Enemy
             }
         }
 
-        private IEnumerator AimedShootLoop()
+        private IEnumerator LaserAttackLoop()
         {
             while (true)
             {
                 yield return _isPhase2 ? _phase2AimedWait : _phase1AimedWait;
-                yield return StartCoroutine(AimAndFireBurst());
+                yield return StartCoroutine(LaserAttack());
             }
         }
 
-        private IEnumerator AimAndFireBurst()
+        private IEnumerator LaserAttack()
         {
-            int   count       = _isPhase2 ? phase2AimedCount    : phase1AimedCount;
-            float aimDuration = _isPhase2 ? phase2AimDuration   : phase1AimDuration;
-            var   burstWait   = _isPhase2 ? _phase2BurstWait    : _phase1BurstWait;
+            float aimDuration = _isPhase2 ? phase2AimDuration : phase1AimDuration;
 
-            // 플레이어 캐싱
             if (_playerTransform == null)
             {
                 GameObject p = GameObject.FindWithTag(Constants.TAG_PLAYER);
                 if (p != null) _playerTransform = p.transform;
             }
 
-            // 조준선 표시 + 깜빡임
+            // ── Aim phase: thin flickering line tracks player ─────
             if (_aimLine != null) _aimLine.enabled = true;
             for (float t = 0f; t < aimDuration; t += Time.deltaTime)
             {
                 if (_aimLine != null && _playerTransform != null)
                 {
                     _aimLine.SetPosition(1, transform.InverseTransformPoint(_playerTransform.position));
-
                     float alpha = (Mathf.Sin(t * _aimFlickerSpeed) + 1f) * 0.5f;
                     Color c     = _aimLineColor;
                     c.a = alpha;
@@ -347,35 +352,53 @@ namespace ShooterGame.Enemy
                 }
                 yield return null;
             }
-            if (_playerTransform == null)
+            if (_aimLine != null) _aimLine.enabled = false;
+
+            if (_playerTransform == null) yield break;
+
+            // ── Lock direction ────────────────────────────────────
+            Vector2 dir = (_playerTransform.position - transform.position).normalized;
+
+            // ── Fire phase: wide beam, origin follows sweeping boss
+            if (_laserLine != null)
             {
-                if (_aimLine != null) _aimLine.enabled = false;
-                yield break;
+                _laserLine.startWidth = _laserWidth;
+                _laserLine.endWidth   = _laserWidth;
+                _laserLine.startColor = _laserColor;
+                _laserLine.endColor   = _laserColor;
+                _laserLine.enabled    = true;
             }
 
-            // 조준 방향 고정 후 연속 발사 — 마지막 탄까지 조준선 유지
-            Vector2 dir   = (_playerTransform.position - transform.position).normalized;
-            float   angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
+            AudioManager.Instance?.PlaySFX(SfxType.EnemyShoot);
 
-            for (int i = 0; i < count; i++)
+            bool  damageDealt = false;
+            float elapsed     = 0f;
+
+            while (elapsed < _laserDuration)
             {
-                // 발사 중에도 조준선 갱신 (solid)
-                if (_aimLine != null && _playerTransform != null)
+                if (_laserLine != null)
                 {
-                    _aimLine.SetPosition(1, transform.InverseTransformPoint(_playerTransform.position));
-                    _aimLine.startColor = _aimLineColor;
-                    Color endC = _aimLineColor;
-                    endC.a = _aimLineColor.a * 0.2f;
-                    _aimLine.endColor = endC;
+                    _laserLine.SetPosition(0, transform.position);
+                    _laserLine.SetPosition(1, (Vector2)transform.position + dir * _laserLength);
                 }
 
-                FireBulletAt(angle);
-                AudioManager.Instance?.PlaySFX(SfxType.EnemyShoot);
-                if (i < count - 1) yield return burstWait;
+                // Raycast damage applied once on the first frame
+                if (!damageDealt)
+                {
+                    RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, _laserLength, _playerLayerMask);
+                    if (hit.collider != null)
+                    {
+                        PlayerStats stats = hit.collider.GetComponent<PlayerStats>();
+                        stats?.TakeDamage(_laserDamage);
+                    }
+                    damageDealt = true;
+                }
+
+                elapsed += Time.deltaTime;
+                yield return null;
             }
 
-            // 모든 탄 발사 완료 후 조준선 제거
-            if (_aimLine != null) _aimLine.enabled = false;
+            if (_laserLine != null) _laserLine.enabled = false;
         }
 
         private void FireSpread(int count)
@@ -397,13 +420,5 @@ namespace ShooterGame.Enemy
             bullet.Initialize(EnemyBulletPool.Instance);
         }
 
-        private void FireBulletAt(float worldAngle)
-        {
-            EnemyBullet bullet = EnemyBulletPool.Instance.Get();
-            if (bullet == null) return;
-            bullet.transform.position = transform.position;
-            bullet.transform.rotation = Quaternion.Euler(0f, 0f, worldAngle);
-            bullet.Initialize(EnemyBulletPool.Instance);
-        }
     }
 }
