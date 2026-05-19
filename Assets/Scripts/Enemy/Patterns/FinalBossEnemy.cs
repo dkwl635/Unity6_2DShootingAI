@@ -63,7 +63,7 @@ namespace ShooterGame.Enemy
         [SerializeField] private float        _laserPreDelay    = 0.2f;
         [SerializeField] private float        _laserDuration    = 1f;
         [SerializeField] private float        _laserTickInterval  = 0.2f;
-        [SerializeField] private float        _laserTrackSpeed    = 60f;
+        [SerializeField] private float        _laserSweepAngle    = 60f;
         [SerializeField] private int          _laserDamage        = 3;
         [SerializeField] private float        _laserLength     = 20f;
         [SerializeField] private LayerMask    _playerLayerMask;
@@ -341,13 +341,17 @@ namespace ShooterGame.Enemy
                 if (p != null) _playerTransform = p.transform;
             }
 
-            // ── Aim phase: thin flickering line tracks player ─────
+            // ── Aim phase: flickering line points at sweep start position ─
             if (_aimLine != null) _aimLine.enabled = true;
             for (float t = 0f; t < aimDuration; t += Time.deltaTime)
             {
                 if (_aimLine != null && _playerTransform != null)
                 {
-                    _aimLine.SetPosition(1, transform.InverseTransformPoint(_playerTransform.position));
+                    bool    isLeft     = _playerTransform.position.x < 0f;
+                    float   startAngle = isLeft ? 270f - _laserSweepAngle : 270f + _laserSweepAngle;
+                    Vector2 sweepDir   = AngleToDir(startAngle);
+                    _aimLine.SetPosition(1, (Vector3)sweepDir * _laserLength);
+
                     float alpha = (Mathf.Sin(t * _aimFlickerSpeed) + 1f) * 0.5f;
                     Color c     = _aimLineColor;
                     c.a = alpha;
@@ -361,13 +365,15 @@ namespace ShooterGame.Enemy
 
             if (_playerTransform == null) yield break;
 
-            // ── Lock direction ────────────────────────────────────
-            Vector2 dir = (_playerTransform.position - transform.position).normalized;
+            // ── Lock sweep area based on final player position ────────────
+            bool  playerLeft      = _playerTransform.position.x < 0f;
+            float sweepStartAngle = playerLeft ? 270f - _laserSweepAngle : 270f + _laserSweepAngle;
+            float sweepEndAngle   = 270f; // always sweep toward straight down (center)
 
-            // ── Pre-fire warning: solid aim line for _laserPreDelay so player can dodge
+            // ── Pre-fire warning: solid line at sweep start so player can dodge ─
             if (_aimLine != null)
             {
-                _aimLine.SetPosition(1, (Vector3)dir * _laserLength);
+                _aimLine.SetPosition(1, (Vector3)AngleToDir(sweepStartAngle) * _laserLength);
                 _aimLine.startColor = _aimLineColor;
                 Color endC = _aimLineColor; endC.a = 0f;
                 _aimLine.endColor = endC;
@@ -376,7 +382,7 @@ namespace ShooterGame.Enemy
             yield return _laserPreWait;
             if (_aimLine != null) _aimLine.enabled = false;
 
-            // ── Fire phase: wide beam, origin follows sweeping boss
+            // ── Fire phase: sweep laser across player's area ──────────────
             if (_laserLine != null)
             {
                 _laserLine.startWidth = _laserWidth;
@@ -388,20 +394,13 @@ namespace ShooterGame.Enemy
 
             AudioManager.Instance?.PlaySFX(SfxType.EnemyShoot);
 
-            float elapsed      = 0f;
-            float damageTimer  = _laserTickInterval; // trigger check immediately on first frame
-            float currentAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            float elapsed     = 0f;
+            float damageTimer = _laserTickInterval;
 
             while (elapsed < _laserDuration)
             {
-                // Rotate laser toward player at fixed angular speed — creates tracking lag
-                if (_playerTransform != null)
-                {
-                    Vector2 toPlayer    = ((Vector2)_playerTransform.position - (Vector2)transform.position).normalized;
-                    float   targetAngle = Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg;
-                    currentAngle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, _laserTrackSpeed * Time.deltaTime);
-                    dir = new Vector2(Mathf.Cos(currentAngle * Mathf.Deg2Rad), Mathf.Sin(currentAngle * Mathf.Deg2Rad));
-                }
+                float   angle = Mathf.LerpAngle(sweepStartAngle, sweepEndAngle, elapsed / _laserDuration);
+                Vector2 dir   = AngleToDir(angle);
 
                 if (_laserLine != null)
                 {
@@ -426,6 +425,12 @@ namespace ShooterGame.Enemy
             }
 
             if (_laserLine != null) _laserLine.enabled = false;
+        }
+
+        private static Vector2 AngleToDir(float degrees)
+        {
+            float rad = degrees * Mathf.Deg2Rad;
+            return new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
         }
 
         private void FireSpread(int count)
