@@ -341,36 +341,62 @@ namespace ShooterGame.Enemy
                 if (p != null) _playerTransform = p.transform;
             }
 
-            // ── Aim phase: flickering line points at sweep start position ─
-            if (_aimLine != null) _aimLine.enabled = true;
+            // ── Aim phase: two thin flickering lines show sweep range edges ─
+            // _aimLine  = sweep START edge (outer), _laserLine = sweep END edge (straight down)
+            if (_laserLine != null)
+            {
+                _laserLine.startWidth = _aimLineWidth;
+                _laserLine.endWidth   = _aimLineWidth * 0.3f;
+            }
+            if (_aimLine   != null) _aimLine.enabled   = true;
+            if (_laserLine != null) _laserLine.enabled = true;
+
             for (float t = 0f; t < aimDuration; t += Time.deltaTime)
             {
-                if (_aimLine != null && _playerTransform != null)
+                float alpha = (Mathf.Sin(t * _aimFlickerSpeed) + 1f) * 0.5f;
+                Color solid = _aimLineColor;
+                Color fade  = _aimLineColor; fade.a = _aimLineColor.a * 0.2f;
+
+                if (_playerTransform != null)
                 {
                     bool    isLeft     = _playerTransform.position.x < 0f;
                     float   startAngle = isLeft ? 270f - _laserSweepAngle : 270f + _laserSweepAngle;
-                    Vector2 sweepDir   = AngleToDir(startAngle);
-                    _aimLine.SetPosition(1, (Vector3)sweepDir * _laserLength);
+                    Vector2 sweepStart = AngleToDir(startAngle);
 
-                    float alpha = (Mathf.Sin(t * _aimFlickerSpeed) + 1f) * 0.5f;
-                    Color c     = _aimLineColor;
-                    c.a = alpha;
-                    _aimLine.startColor = c;
-                    c.a = alpha * 0.2f;
-                    _aimLine.endColor = c;
+                    if (_aimLine != null)
+                    {
+                        _aimLine.SetPosition(1, (Vector3)sweepStart * _laserLength);
+                        Color c = solid; c.a = alpha;
+                        _aimLine.startColor = c;
+                        c = fade; c.a = alpha * 0.2f;
+                        _aimLine.endColor = c;
+                    }
                 }
+
+                // Sweep end is always straight down (270° = Vector2.down)
+                if (_laserLine != null)
+                {
+                    _laserLine.SetPosition(0, transform.position);
+                    _laserLine.SetPosition(1, (Vector2)transform.position + Vector2.down * _laserLength);
+                    Color c = solid; c.a = alpha;
+                    _laserLine.startColor = c;
+                    c = fade; c.a = alpha * 0.2f;
+                    _laserLine.endColor = c;
+                }
+
                 yield return null;
             }
-            if (_aimLine != null) _aimLine.enabled = false;
+            if (_aimLine   != null) _aimLine.enabled   = false;
+            if (_laserLine != null) _laserLine.enabled = false;
 
             if (_playerTransform == null) yield break;
 
             // ── Lock sweep area based on final player position ────────────
             bool  playerLeft      = _playerTransform.position.x < 0f;
             float sweepStartAngle = playerLeft ? 270f - _laserSweepAngle : 270f + _laserSweepAngle;
-            float sweepEndAngle   = 270f; // always sweep toward straight down (center)
+            float sweepEndAngle   = 270f;
 
-            // ── Pre-fire warning: solid line at sweep start so player can dodge ─
+            // ── Pre-fire: both edges solid so player can dodge ────────────
             if (_aimLine != null)
             {
                 _aimLine.SetPosition(1, (Vector3)AngleToDir(sweepStartAngle) * _laserLength);
@@ -379,8 +405,18 @@ namespace ShooterGame.Enemy
                 _aimLine.endColor = endC;
                 _aimLine.enabled  = true;
             }
+            if (_laserLine != null)
+            {
+                _laserLine.SetPosition(0, transform.position);
+                _laserLine.SetPosition(1, (Vector2)transform.position + Vector2.down * _laserLength);
+                _laserLine.startColor = _aimLineColor;
+                Color endC = _aimLineColor; endC.a = 0f;
+                _laserLine.endColor = endC;
+                _laserLine.enabled  = true;
+            }
             yield return _laserPreWait;
-            if (_aimLine != null) _aimLine.enabled = false;
+            if (_aimLine   != null) _aimLine.enabled   = false;
+            if (_laserLine != null) _laserLine.enabled = false;
 
             // ── Fire phase: sweep laser across player's area ──────────────
             if (_laserLine != null)
